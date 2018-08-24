@@ -33,6 +33,14 @@ class MolGraph(Chem.rdchem.Mol):
         return sssr_copy2
 
     @property
+    def sssr_list(self):
+        list_sssr = []
+        for ring in rdmolops.GetSymmSSSR(self):
+            list_sssr.append(list(ring))
+            sssr_copy2 = deepcopy(list_sssr)
+        return sssr_copy2
+
+    @property
     def graph(self):
         atom_types, bonds, bond_types = [], [], []
         for atom in self.GetAtoms():
@@ -46,6 +54,47 @@ class MolGraph(Chem.rdchem.Mol):
         graph.add_nodes_from(range(self.GetNumAtoms()))
         graph.add_edges_from(bonds)
         return graph
+
+    @property
+    def cracked_graph(self):
+        graph = deepcopy(self.graph)
+        for i in list(graph.edges):
+            on = False
+            for j in self.sssr_list:
+                if i[0] in j and i[1] in j:
+                    on = True
+                    break
+            if not on:
+                graph.remove_edge(i[0], i[1])
+        return graph
+
+    @property
+    def chains(self):
+        sssr = self.sssr_list
+        list_atom_idx = list(range(self.GetNumAtoms()))
+        sssr_tmp = []
+        for i_sssr in sssr:
+            sssr_tmp += i_sssr
+        sssr_list = list(set(sssr_tmp))
+        list_atom_removed_idx = list(set(list_atom_idx).difference(set(sssr_list)))
+        return list_atom_removed_idx
+
+    @property
+    def ring_assemblies(self):
+        graph = deepcopy(self.cracked_graph)
+        graph.remove_nodes_from(self.chains)
+        rings = list(nx.connected_component_subgraphs(graph))
+        return rings
+
+    @property
+    def ring_assemblies_list(self):
+        list_list_ring_assemblies = []
+        list_atom_idx_types = []
+        list_bond_idx_types = []
+        list_ring_assemblies = deepcopy(self.ring_assemblies)
+        for ring_assemblies in list_ring_assemblies:
+            pass
+        return list_list_ring_assemblies
 
     # remove side chains
     def get_murko_graph(self, graph=None):
@@ -145,23 +194,3 @@ class MolGraph(Chem.rdchem.Mol):
         return sng_u
 
 
-# def get_graph_from_smiles_list(smiles_list):
-#     graph_list = []
-#     for smiles in smiles_list:
-#         mol = Chem.MolFromSmiles(smiles)
-#
-#         # build graph
-#         atom_types, bonds, bond_types = [], [], []
-#         for a in mol.GetAtoms():
-#             atom_types.append(atom_to_index(a))
-#         for b in mol.GetBonds():
-#             idx_1, idx_2, bt = b.GetBeginAtomIdx(), b.GetEndAtomIdx(), bond_to_index(b)
-#             bonds.append([idx_1, idx_2])
-#             bond_types.append(bt)
-#
-#         X_0 = np.array(atom_types, dtype=np.int32)
-#         A_0 = np.concatenate([np.array(bonds, dtype=np.int32),
-#                               np.array(bond_types, dtype=np.int32)[:, np.newaxis]],
-#                              axis=1)
-#         graph_list.append([X_0, A_0])
-#     return graph_list

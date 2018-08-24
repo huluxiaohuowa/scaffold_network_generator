@@ -1,6 +1,7 @@
 from rdkit import Chem
 import re
 from copy import deepcopy
+from . import data_struct
 
 ATOM_SYMBOLS = ['C', 'F', 'I', 'Cl', 'N', 'O', 'P', 'Br', 'S']
 BOND_ORDERS = [Chem.BondType.AROMATIC,
@@ -131,3 +132,33 @@ def graph_eq(graph1, graph2):
         return True
     else:
         return False
+
+
+# noinspection PyArgumentList
+def get_mol_from_graph(X, A, sanitize=True):
+    try:
+        mol = Chem.RWMol(Chem.Mol())
+
+        X, A = X.tolist(), A.tolist()
+        for i, atom_type in enumerate(X):
+            mol.AddAtom(data_struct.get_mol_spec().index_to_atom(atom_type))
+
+        for atom_id1, atom_id2, bond_type in A:
+            data_struct.get_mol_spec().index_to_bond(mol, atom_id1, atom_id2, bond_type)
+    except:
+        return None
+
+    if sanitize:
+        try:
+            mol = mol.GetMol()
+            Chem.SanitizeMol(mol)
+            return mol
+        except:
+            return None
+    else:
+        return mol
+
+
+def get_mol_from_graph_list(graph_list, sanitize=True):
+    mol_list = [get_mol_from_graph(X, A, sanitize) for X, A in graph_list]
+    return mol_list

@@ -4,6 +4,7 @@ import networkx as nx
 from rdkit.Chem import rdmolops
 from collections import Counter
 from copy import deepcopy
+from . import data_struct
 
 __all__ = [
     'MolGraph',
@@ -88,13 +89,20 @@ class MolGraph(Chem.rdchem.Mol):
 
     @property
     def ring_assemblies_list(self):
-        list_list_ring_assemblies = []
-        list_atom_idx_types = []
-        list_bond_idx_types = []
+        list_list_atom_idx_types = []
+        list_list_bond_idx_types = []
         list_ring_assemblies = deepcopy(self.ring_assemblies)
-        for ring_assemblies in list_ring_assemblies:
-            pass
-        return list_list_ring_assemblies
+        for graph in list_ring_assemblies:
+            list_atom_idx_types = []
+            list_bond_idx_types = []
+            for node in graph.nodes:
+                list_atom_idx_types.append([])
+                pass
+            for edge in graph.edges:
+                pass
+            list_list_atom_idx_types.append(list_atom_idx_types)
+            list_list_bond_idx_types.append(list_bond_idx_types)
+        return list_list_atom_idx_types, list_list_bond_idx_types
 
     # remove side chains
     def get_murko_graph(self, graph=None):

@@ -12,7 +12,9 @@ BOND_ORDERS = [Chem.BondType.AROMATIC,
 
 def get_atom_type(atom):
     atom_symbol = ATOM_SYMBOLS.index(atom.GetSymbol())
-    return atom_symbol
+    atom_charge = atom.GetFormalCharge()
+    atom_hs = atom.GetNumExplicitHs()
+    return [atom_symbol, atom_charge, atom_hs]
 
 
 def get_bond_type(bond):
@@ -35,36 +37,36 @@ def tokenize(smiles):
     return tokenized
 
 
-# def _build_atom_types():
-#     atom_types = []
-#     with open('.datasets/atom_types.txt', 'w') as f:
-#         with open('.datasets/ChEMBL_cleaned_indexed.smi') as h:
-#             for line in h:
-#                 if line == '':
-#                     break
-#                 smiles = line.strip('\n').strip('\r')
-#                 m = Chem.MolFromSmiles(smiles)
-#                 for a in m.GetAtoms():
-#                     atom_type = get_atom_type(a)
-#                     if atom_type not in atom_types:
-#                         atom_types.append(atom_type)
-#         for atom_symbol in atom_types:
-#             f.write(str(atom_symbol) + '\n')
-#
-#
-# def _load_atom_types():
-#     atom_types = []
-#     with open('datasets/atom_types.txt') as f:
-#         for line in f:
-#             atom_types.append(int(x) for x in line.strip('\n'))
-#     return atom_types
+def _build_atom_types():
+    atom_types = []
+    with open('.datasets/atom_types.txt', 'w') as f:
+        with open('.datasets/ChEMBL_cleaned_indexed.smi') as h:
+            for line in h:
+                if line == '':
+                    break
+                smiles = line.strip('\n').strip('\r')
+                m = Chem.MolFromSmiles(smiles)
+                for a in m.GetAtoms():
+                    atom_type = get_atom_type(a)
+                    if atom_type not in atom_types:
+                        atom_types.append(atom_type)
+        for atom_symbol in atom_types:
+            f.write(str(atom_symbol) + '\n')
 
 
-# ATOM_TYPES = _load_atom_types()
-# BOND_TYPES = range(len(BOND_ORDERS))
-#
-# NUM_ATOM_TYPES = len(ATOM_TYPES)
-# NUM_BOND_TYPES = len(BOND_TYPES)
+def _load_atom_types():
+    atom_types = []
+    with open('datasets/atom_types.txt') as f:
+        for line in f:
+            atom_types.append(int(x) for x in line.strip('\n'))
+    return atom_types
+
+
+ATOM_TYPES = _load_atom_types()
+BOND_TYPES = range(len(BOND_ORDERS))
+
+NUM_ATOM_TYPES = len(ATOM_TYPES)
+NUM_BOND_TYPES = len(BOND_TYPES)
 
 
 def atom_to_index(atom):

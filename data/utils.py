@@ -37,10 +37,13 @@ def tokenize(smiles):
     return tokenized
 
 
-def _build_atom_types():
+def _build_atom_types(
+        file_atom_types='data/datasets/atom_types.txt',
+        file_chembl='data/datasets/ChEMBL_cleaned_indexed.smi'
+):
     atom_types = []
-    with open('.datasets/atom_types.txt', 'w') as f:
-        with open('.datasets/ChEMBL_cleaned_indexed.smi') as h:
+    with open(file_atom_types, 'w') as f:
+        with open(file_chembl) as h:
             for line in h:
                 if line == '':
                     break
@@ -54,9 +57,9 @@ def _build_atom_types():
             f.write(str(atom_symbol) + '\n')
 
 
-def _load_atom_types():
+def _load_atom_types(file_atom_types='data/datasets/atom_types.txt'):
     atom_types = []
-    with open('datasets/atom_types.txt') as f:
+    with open(file_atom_types) as f:
         for line in f:
             atom_types.append(int(x) for x in line.strip('\n'))
     return atom_types
@@ -136,20 +139,17 @@ def graph_eq(graph1, graph2):
         return False
 
 
-# noinspection PyArgumentList
-def get_mol_from_graph(X, A, sanitize=True):
+def get_mol_from_graph(
+        atom_idx_symbol_charge_hs,
+        bond_start_end,
+        sanitize=True
+):
     try:
         mol = Chem.RWMol(Chem.Mol())
-
-        X, A = X.tolist(), A.tolist()
-        for i, atom_type in enumerate(X):
-            mol.AddAtom(data_struct.get_mol_spec().index_to_atom(atom_type))
-
-        for atom_id1, atom_id2, bond_type in A:
-            data_struct.get_mol_spec().index_to_bond(mol, atom_id1, atom_id2, bond_type)
+        for atom in atom_idx_symbol_charge_hs:
+            mol.AddAtom
     except:
         return None
-
     if sanitize:
         try:
             mol = mol.GetMol()
@@ -157,8 +157,31 @@ def get_mol_from_graph(X, A, sanitize=True):
             return mol
         except:
             return None
-    else:
-        return mol
+    pass
+
+# noinspection PyArgumentList
+# def get_mol_from_graph(X, A, sanitize=True):
+#     try:
+#         mol = Chem.RWMol(Chem.Mol())
+#
+#         X, A = X.tolist(), A.tolist()
+#         for i, atom_type in enumerate(X):
+#             mol.AddAtom(data_struct.get_mol_spec().index_to_atom(atom_type))
+#
+#         for atom_id1, atom_id2, bond_type in A:
+#             data_struct.get_mol_spec().index_to_bond(mol, atom_id1, atom_id2, bond_type)
+#     except:
+#         return None
+#
+#     if sanitize:
+#         try:
+#             mol = mol.GetMol()
+#             Chem.SanitizeMol(mol)
+#             return mol
+#         except:
+#             return None
+#     else:
+#         return mol
 
 
 def get_mol_from_graph_list(graph_list, sanitize=True):

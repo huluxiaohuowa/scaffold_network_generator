@@ -8,7 +8,7 @@ __all__ = [
 
 
 class MoleculeSpec(object):
-    def __init__(self, file_name='datasets/atom_types.txt'):
+    def __init__(self, file_name='data/datasets/atom_types.txt'):
         self.atom_types = []
         self.atom_symbols = []
         with open(file_name) as f:

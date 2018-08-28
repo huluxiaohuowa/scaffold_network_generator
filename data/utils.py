@@ -38,10 +38,14 @@ def tokenize(smiles):
     return tokenized
 
 
-def _build_atom_types(
-        file_atom_types=path.join(path.dirname(__file__), 'datasets', 'atom_types.txt'),
-        file_chembl=path.join(path.dirname(__file__), 'datasets', 'ChEMBL_cleaned_indexed.smi')
-):
+def _build_atom_types(file_atom_types=path.join(path.dirname(__file__),
+                                                'datasets',
+                                                'atom_types.txt'),
+                      file_chembl=path.join(path.dirname(__file__),
+                                            'datasets',
+                                            'ChEMBL_cleaned_indexed.smi'
+                                            )
+                      ):
     atom_types = []
     with open(file_atom_types, 'w') as f:
         with open(file_chembl) as h:
@@ -58,7 +62,9 @@ def _build_atom_types(
             f.write(str(atom_symbol) + '\n')
 
 
-def _load_atom_types(file_atom_types=path.join(path.dirname(__file__), 'datasets', 'atom_types.txt')):
+def _load_atom_types(file_atom_types=path.join(path.dirname(__file__),
+                                               'datasets', 'atom_types.txt'
+                                               )):
     atom_types = []
     with open(file_atom_types) as f:
         for line in f:
@@ -141,23 +147,32 @@ def graph_eq(graph1, graph2):
 
 
 def get_mol_from_graph(
-        atom_idx_symbol_charge_hs,
+        idx_atom_idx_symbol_charge_hs,
         bond_start_end,
         sanitize=True
 ):
     try:
+        chem = data_struct.get_mol_spec()
         mol = Chem.RWMol(Chem.Mol())
-        for atom in atom_idx_symbol_charge_hs:
-            mol.AddAtom()
-    except:
-        return None
-    if sanitize:
-        try:
+        i = 0
+        dic = {}
+        for atom in idx_atom_idx_symbol_charge_hs:
+            mol.AddAtom(chem.index_to_atom(chem.atom_types.index((atom[2],
+                                                                  atom[3],
+                                                                  atom[4]
+                                                                  ))))
+            dic[atom[1]] = atom[0]
+            i += 1
+        for bond in bond_start_end:
+            chem.index_to_bond(mol, dic[bond[0]], dic[bond[1]], bond[2])
+
+        if sanitize:
             mol = mol.GetMol()
             Chem.SanitizeMol(mol)
             return mol
-        except:
-            return None
+    except:
+        return None
+
     pass
 
 # noinspection PyArgumentList

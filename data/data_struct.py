@@ -1,5 +1,5 @@
 from rdkit import Chem
-
+from os import path
 
 __all__ = [
     'MoleculeSpec',
@@ -8,7 +8,9 @@ __all__ = [
 
 
 class MoleculeSpec(object):
-    def __init__(self, file_name='data/datasets/atom_types.txt'):
+    def __init__(self,
+                 file_name=path.join(path.dirname(__file__), 'datasets', 'atom_types.txt')
+                 ):
         self.atom_types = []
         self.atom_symbols = []
         with open(file_name) as f:

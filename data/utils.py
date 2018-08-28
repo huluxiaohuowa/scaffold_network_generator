@@ -2,6 +2,7 @@ from rdkit import Chem
 import re
 from copy import deepcopy
 from . import data_struct
+from os import path
 
 ATOM_SYMBOLS = ['C', 'F', 'I', 'Cl', 'N', 'O', 'P', 'Br', 'S']
 BOND_ORDERS = [Chem.BondType.AROMATIC,
@@ -38,8 +39,8 @@ def tokenize(smiles):
 
 
 def _build_atom_types(
-        file_atom_types='data/datasets/atom_types.txt',
-        file_chembl='data/datasets/ChEMBL_cleaned_indexed.smi'
+        file_atom_types=path.join(path.dirname(__file__), 'datasets', 'atom_types.txt'),
+        file_chembl=path.join(path.dirname(__file__), 'datasets', 'ChEMBL_cleaned_indexed.smi')
 ):
     atom_types = []
     with open(file_atom_types, 'w') as f:
@@ -57,7 +58,7 @@ def _build_atom_types(
             f.write(str(atom_symbol) + '\n')
 
 
-def _load_atom_types(file_atom_types='data/datasets/atom_types.txt'):
+def _load_atom_types(file_atom_types=path.join(path.dirname(__file__), 'datasets', 'atom_types.txt')):
     atom_types = []
     with open(file_atom_types) as f:
         for line in f:
@@ -147,7 +148,7 @@ def get_mol_from_graph(
     try:
         mol = Chem.RWMol(Chem.Mol())
         for atom in atom_idx_symbol_charge_hs:
-            mol.AddAtom
+            mol.AddAtom()
     except:
         return None
     if sanitize:

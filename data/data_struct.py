@@ -19,14 +19,23 @@ class MoleculeSpec(object):
                 self.atom_types.append((atom_type_i[0], int(atom_type_i[1]), int(atom_type_i[2])))
                 if atom_type_i[0] not in self.atom_symbols:
                     self.atom_symbols.append(atom_type_i[0])
+        for atom_symbol_i in self.atom_symbols:
+            if len([atom_type_i for atom_type_i in self.atom_types if atom_type_i[0]==atom_symbol_i]) != 1:
+                # add unlabeled atom type
+                self.atom_types.append((atom_symbol_i, None, None))
+            else:
+                continue
+
         self.bond_orders = [Chem.BondType.AROMATIC,
                             Chem.BondType.SINGLE,
                             Chem.BondType.DOUBLE,
                             Chem.BondType.TRIPLE]
         self.max_iter = 70
 
-    def get_atom_type(self, atom):
+    def get_atom_type(self, atom, unlabeled=False):
         atom_symbol = atom.GetSymbol()
+        if unlabeled and (atom_symbol, None, None) in self.atom_types:
+            return self.atom_types.index((atom_symbol, None, None))
         atom_charge = atom.GetFormalCharge()
         atom_hs = atom.GetNumExplicitHs()
         return self.atom_types.index((atom_symbol, atom_charge, atom_hs))
@@ -36,6 +45,7 @@ class MoleculeSpec(object):
 
     def index_to_atom(self, idx):
         atom_symbol, atom_charge, atom_hs = self.atom_types[idx]
+        assert atom_charge is not None and atom_hs is not None
         a = Chem.Atom(atom_symbol)
         a.SetFormalCharge(atom_charge)
         a.SetNumExplicitHs(atom_hs)

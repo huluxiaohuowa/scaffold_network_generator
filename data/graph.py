@@ -112,6 +112,29 @@ class MolGraph(object):
             list_list_bond_idx_types.append(list_bond_idx_types)
         return list_list_atom_idx_types, list_list_bond_idx_types
 
+    def ls_mol_from_sng_u(self,
+                          ls_ls_atom=None,
+                          ls_ls_bond=None,
+                          sanitize=True
+                          ):
+        ls_mol = []
+        if not any((ls_ls_atom, ls_ls_bond)):
+            ls_ls_atom, ls_ls_bond = self.graph_list_to_list()
+        for ls_atom, ls_bond in zip(ls_ls_atom, ls_ls_bond):
+            i = 0
+            dic = {}
+            ls_atom_new = []
+            ls_bond_new = []
+            for atom in ls_atom:
+                dic[atom[1]] = atom[0]
+                ls_atom_new.append((atom[2], atom[3], atom[4]))
+                i += 1
+            for bond in ls_bond:
+                ls_bond_new.append((dic[bond[0]], dic[bond[1]], bond[2]))
+            mol = get_mol_from_graph(ls_atom_new, ls_bond_new, sanitize)
+            ls_mol.append(mol)
+        return ls_mol
+
     # remove side chains
     def get_murko_graph(self, graph=None):
         if graph is None:

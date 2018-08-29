@@ -146,34 +146,59 @@ def graph_eq(graph1, graph2):
         return False
 
 
-def get_mol_from_graph(
-        idx_atom_idx_symbol_charge_hs,
-        bond_start_end,
-        sanitize=True
-):
+def get_mol_from_graph(symbol_charge_hs,
+                       bond_start_end,
+                       santitize=True
+                       ):
     try:
         chem = data_struct.get_mol_spec()
         mol = Chem.RWMol(Chem.Mol())
-        i = 0
-        dic = {}
-        for atom in idx_atom_idx_symbol_charge_hs:
-            mol.AddAtom(chem.index_to_atom(chem.atom_types.index((atom[2],
-                                                                  atom[3],
-                                                                  atom[4]
-                                                                  ))))
-            dic[atom[1]] = atom[0]
-            i += 1
+        for atom in symbol_charge_hs:
+            mol.AddAtom(chem.index_to_atom(chem.atom_types.index(atom)))
         for bond in bond_start_end:
-            chem.index_to_bond(mol, dic[bond[0]], dic[bond[1]], bond[2])
-
-        if sanitize:
+            chem.index_to_bond(mol, bond[0], bond[1], bond[2])
+        if santitize:
             mol = mol.GetMol()
             Chem.SanitizeMol(mol)
-            return mol
+        return mol
     except:
         return None
 
-    pass
+
+# def get_mol_from_graph(
+#         idx_atom_idx_symbol_charge_hs,
+#         bond_start_end,
+#         sanitize=True
+# ):
+#     try:
+#         chem = data_struct.get_mol_spec()
+#         mol = Chem.RWMol(Chem.Mol())
+#         i = 0
+#         dic = {}
+#         for atom in idx_atom_idx_symbol_charge_hs:
+#             mol.AddAtom(chem.index_to_atom(chem.atom_types.index((atom[2],
+#                                                                   atom[3],
+#                                                                   atom[4]
+#                                                                   ))))
+#             dic[atom[1]] = atom[0]
+#             i += 1
+#         for bond in bond_start_end:
+#             chem.index_to_bond(mol, dic[bond[0]], dic[bond[1]], bond[2])
+#
+#         if sanitize:
+#             mol = mol.GetMol()
+#             Chem.SanitizeMol(mol)
+#             return mol
+#     except:
+#         return None
+
+def get_mol_from_graph_list(ls_ls_atom,
+                            ls_ls_bond,
+                            sanitize=True
+                            ):
+    mol_list = [get_mol_from_graph(ls_atom, ls_bond, sanitize) for ls_atom, ls_bond in zip(ls_ls_atom, ls_ls_bond)]
+    return mol_list
+
 
 # noinspection PyArgumentList
 # def get_mol_from_graph(X, A, sanitize=True):

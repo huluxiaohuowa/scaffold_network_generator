@@ -19,12 +19,15 @@ num_lines += 1
 
 
 def get_smiles(idx_line):
-    return linecache(input_dir, idx_line).strip()
+    return linecache.getline(input_dir, idx_line).strip()
 
 
 if __name__ == '__main__':
+    print(num_lines)
+    print(get_smiles(20))
     pool = Pool(processes=num_process)
-    for i in range(num_process):
-        pool.apply(get_smiles, (i,), callback=data.output_to_file)
+    for i in range(num_lines):
+        pool.apply_async(get_smiles, (i+1,), callback=data.output_to_file)
     pool.close()
     pool.join()
+

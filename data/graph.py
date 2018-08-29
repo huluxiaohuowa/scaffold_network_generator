@@ -37,8 +37,7 @@ class MolGraph(object):
         list_sssr = []
         for ring in rdmolops.GetSymmSSSR(self.mol):
             list_sssr.append(list(ring))
-            sssr_copy2 = deepcopy(list_sssr)
-        return sssr_copy2
+        return list_sssr
 
     @property
     def graph(self):

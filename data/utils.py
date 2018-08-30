@@ -165,9 +165,9 @@ def get_mol_from_graph(symbol_charge_hs,
             Chem.SanitizeMol(mol)
             return mol
         except:
-            return mol
+            return None
     else:
-        return mol
+        return None
 
 
 # def get_mol_from_graph(

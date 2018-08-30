@@ -103,9 +103,7 @@ class MolGraph(object):
                 if atom_idx in self.hydro_nitro and \
                         [i for j in list(graph.edges) for i in j].count(atom_idx) < 3:
                     h_num += 1
-                if atom_idx in self.c2o:
-                    charge += 2
-                    # h_num += 1
+
                 list_atom_idx_types.append((i,
                                             atom_idx,
                                             symbol,
@@ -289,6 +287,12 @@ class MolGraph(object):
                     counts += 1
             if counts == 0:
                 sng_u.append(i_graph)
+        bond, co = self.c2o
+        for j in range(len(sng_u)):
+            for i in co:
+                if i in sng_u[j].nodes:
+                    sng_u[j].add_node(co[i])
+                    sng_u[j].add_edge(i, co[i])
         return sng_u
 
     @property
@@ -324,9 +328,23 @@ class MolGraph(object):
 
     @property
     def c2o(self):
-        return [atom.GetIdx() for atom in self.mol.GetAromaticAtoms() if atom.GetSymbol() == 'C' and atom.GetIdx()
-                in [i for j in [(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()) for bond in self.mol.GetBonds()
-                                if bond.GetBondType() == Chem.rdchem.BondType.DOUBLE] for i in j]]
+        aro_c = [atom.GetIdx() for atom in self.mol.GetAromaticAtoms() if atom.GetSymbol() == 'C']
+        aro_co = [(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx(), get_bond_type(bond))
+                  for bond in self.mol.GetBonds() if get_bond_type(bond) == 2 and
+                  (bond.GetBeginAtomIdx() in aro_c or bond.GetEndAtomIdx() in aro_c)
+                  ]
+        dic = {}
+        for bond in aro_co:
+            if bond[0] in aro_c:
+                dic[bond[0]] = bond[1]
+            else:
+                dic[bond[1]] = bond[0]
+        return aro_co, dic
+        #return aro_co
+
+        # return [atom.GetIdx() for atom in self.mol.GetAromaticAtoms() if atom.GetSymbol() == 'C' and atom.GetIdx()
+        #         in [i for j in [(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()) for bond in self.mol.GetBonds()
+        #                         if bond.GetBondType() == Chem.rdchem.BondType.DOUBLE] for i in j]]
 
 
 def get_mol_graph(smiles):

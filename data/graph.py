@@ -13,7 +13,7 @@ __all__ = ['MolGraph',
 class MolGraph(object):
     def __init__(self, smiles):
         self.mol = Chem.MolFromSmiles(smiles)
-        self.aromatic_chained_nitro = []
+        # self.aromatic_chained_nitro = []
 
     @property
     def sssr(self):
@@ -93,15 +93,23 @@ class MolGraph(object):
             graph_list = self.sng_unique
         for graph in graph_list:
             list_atom_idx_types = []
-            list_bond_5idx_types = []
+            list_bond_idx_types = []
             i = 0
             for atom_idx in list(graph.nodes):
-                list_atom_idx_types.append((i,
-                                            atom_idx,
-                                            self.mol.GetAtomWithIdx(atom_idx).GetSymbol(),
-                                            self.mol.GetAtomWithIdx(atom_idx).GetFormalCharge(),
-                                            self.mol.GetAtomWithIdx(atom_idx).GetNumExplicitHs()
-                                            ))
+                if atom_idx not in self.hydro_nitro:
+                    list_atom_idx_types.append((i,
+                                                atom_idx,
+                                                self.mol.GetAtomWithIdx(atom_idx).GetSymbol(),
+                                                self.mol.GetAtomWithIdx(atom_idx).GetFormalCharge(),
+                                                self.mol.GetAtomWithIdx(atom_idx).GetNumExplicitHs()
+                                                ))
+                else:
+                    list_atom_idx_types.append((i,
+                                                atom_idx,
+                                                self.mol.GetAtomWithIdx(atom_idx).GetSymbol(),
+                                                self.mol.GetAtomWithIdx(atom_idx).GetFormalCharge(),
+                                                self.mol.GetAtomWithIdx(atom_idx).GetNumExplicitHs() + 1
+                                                ))
                 i += 1
             for edge in list(graph.edges):
                 list_bond_idx_types.append((edge[0],
@@ -299,17 +307,16 @@ class MolGraph(object):
             graph_sng += self.ring_assemblies
             return graph_sng
 
+    @property
     def hydro_nitro(self):
-        aromatic_indexs = [a.GetIdx() for a in self.mol.GetAromaticAtoms()]
-        aromatic_nitros = []
-        for index in aromatic_indexs:
-            for tuple in self.graph_list_to_list()[0][0]:
-                if tuple[1] == index and tuple[2] == 'N':
-                    aromatic_nitros.append(index)
+        aromatic_chained_nitro = []
+        aromatic_nitros= [a.GetIdx() for a in self.mol.GetAromaticAtoms() if a.GetSymbol() == 'N']
         for nitro_index in aromatic_nitros:
             for chain_atom_index in self.chains:
                 if (nitro_index, chain_atom_index) in self.graph.edges:
-                    self.aromatic_chained_nitro.append(nitro_index)
+                    aromatic_chained_nitro.append(nitro_index)
+        return aromatic_chained_nitro
+
 
 def get_mol_graph(smiles):
     return MolGraph(smiles)

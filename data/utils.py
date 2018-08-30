@@ -159,7 +159,7 @@ def get_mol_from_graph(symbol_charge_hs,
             chem.index_to_bond(mol, bond[0], bond[1], bond[2])
         if santitize:
             mol = mol.GetMol()
-            # Chem.SanitizeMol(mol)
+            Chem.SanitizeMol(mol)
         return mol
     except:
         return mol

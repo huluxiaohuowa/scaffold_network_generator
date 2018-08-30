@@ -312,9 +312,12 @@ class MolGraph(object):
         aromatic_chained_nitro = []
         aromatic_nitros= [a.GetIdx() for a in self.mol.GetAromaticAtoms() if a.GetSymbol() == 'N']
         for nitro_index in aromatic_nitros:
-            for chain_atom_index in self.chains:
-                if (nitro_index, chain_atom_index) in self.graph.edges:
-                    aromatic_chained_nitro.append(nitro_index)
+            bond_num = 0
+            for atom_index in range(self.mol.GetNumAtoms()):
+                if (nitro_index, atom_index) in self.graph.edges:
+                    bond_num += 1
+            if bond_num >= 3:
+                aromatic_chained_nitro.append(nitro_index)
         return aromatic_chained_nitro
 
 

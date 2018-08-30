@@ -24,10 +24,10 @@ def get_smiles(idx_line):
 
 if __name__ == '__main__':
     print(num_lines)
-    print(get_smiles(20))
-    pool = Pool(processes=num_process)
     for i in range(num_lines):
-        pool.apply_async(get_smiles, (i+1,), callback=data.output_to_file)
-    pool.close()
-    pool.join()
+        try:
+            data.output_to_file(get_smiles(i+1))
+        except:
+            print(get_smiles(i+1))
+
 

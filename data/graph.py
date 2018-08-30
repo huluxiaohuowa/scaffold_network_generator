@@ -96,19 +96,20 @@ class MolGraph(object):
             list_bond_idx_types = []
             i = 0
             for atom_idx in list(graph.nodes):
-                if atom_idx not in self.hydro_nitro:
+                if atom_idx in self.hydro_nitro and \
+                        [i for j in list(graph.edges) for i in j].count(atom_idx) < 3:
                     list_atom_idx_types.append((i,
                                                 atom_idx,
                                                 self.mol.GetAtomWithIdx(atom_idx).GetSymbol(),
                                                 self.mol.GetAtomWithIdx(atom_idx).GetFormalCharge(),
-                                                self.mol.GetAtomWithIdx(atom_idx).GetNumExplicitHs()
+                                                self.mol.GetAtomWithIdx(atom_idx).GetNumExplicitHs() + 1
                                                 ))
                 else:
                     list_atom_idx_types.append((i,
                                                 atom_idx,
                                                 self.mol.GetAtomWithIdx(atom_idx).GetSymbol(),
                                                 self.mol.GetAtomWithIdx(atom_idx).GetFormalCharge(),
-                                                self.mol.GetAtomWithIdx(atom_idx).GetNumExplicitHs() + 1
+                                                self.mol.GetAtomWithIdx(atom_idx).GetNumExplicitHs()
                                                 ))
                 i += 1
             for edge in list(graph.edges):
@@ -139,7 +140,10 @@ class MolGraph(object):
                 i += 1
             for bond in ls_bond:
                 ls_bond_new.append((dic[bond[0]], dic[bond[1]], bond[2]))
+
             mol = get_mol_from_graph(ls_atom_new, ls_bond_new, sanitize)
+            if mol is None:
+                print(Chem.MolToSmiles(self.mol))
             ls_mol.append(mol)
         return ls_mol
 
@@ -312,11 +316,7 @@ class MolGraph(object):
         aromatic_chained_nitro = []
         aromatic_nitros= [a.GetIdx() for a in self.mol.GetAromaticAtoms() if a.GetSymbol() == 'N']
         for nitro_index in aromatic_nitros:
-            bond_num = 0
-            for atom_index in range(self.mol.GetNumAtoms()):
-                if (nitro_index, atom_index) in self.graph.edges:
-                    bond_num += 1
-            if bond_num >= 3:
+            if[i for j in list(self.graph.edges) for i in j].count(nitro_index) >= 3:
                 aromatic_chained_nitro.append(nitro_index)
         return aromatic_chained_nitro
 

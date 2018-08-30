@@ -148,7 +148,7 @@ def graph_eq(graph1, graph2):
 
 def get_mol_from_graph(symbol_charge_hs,
                        bond_start_end,
-                       santitize=True
+                       sanitize=True
                        ):
     try:
         chem = data_struct.get_mol_spec()
@@ -157,11 +157,16 @@ def get_mol_from_graph(symbol_charge_hs,
             mol.AddAtom(chem.index_to_atom(chem.atom_types.index(atom)))
         for bond in bond_start_end:
             chem.index_to_bond(mol, bond[0], bond[1], bond[2])
-        if santitize:
+    except:
+        return None
+    if sanitize:
+        try:
             mol = mol.GetMol()
             Chem.SanitizeMol(mol)
-        return mol
-    except:
+            return mol
+        except:
+            return None
+    else:
         return mol
 
 

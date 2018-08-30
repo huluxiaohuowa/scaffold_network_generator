@@ -150,22 +150,22 @@ def get_mol_from_graph(symbol_charge_hs,
                        bond_start_end,
                        sanitize=True
                        ):
-    try:
-        chem = data_struct.get_mol_spec()
-        mol = Chem.RWMol(Chem.Mol())
-        for atom in symbol_charge_hs:
-            mol.AddAtom(chem.index_to_atom(chem.atom_types.index(atom)))
-        for bond in bond_start_end:
-            chem.index_to_bond(mol, bond[0], bond[1], bond[2])
-    except:
-        return None
+
+    chem = data_struct.get_mol_spec()
+    mol = Chem.RWMol(Chem.Mol())
+    for atom in symbol_charge_hs:
+        mol.AddAtom(chem.index_to_atom(chem.atom_types.index(atom)))
+    for bond in bond_start_end:
+        chem.index_to_bond(mol, bond[0], bond[1], bond[2])
+
+
     if sanitize:
         try:
             mol = mol.GetMol()
             Chem.SanitizeMol(mol)
             return mol
         except:
-            return None
+            return mol
     else:
         return mol
 

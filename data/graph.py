@@ -96,21 +96,23 @@ class MolGraph(object):
             list_bond_idx_types = []
             i = 0
             for atom_idx in list(graph.nodes):
+                symbol = self.mol.GetAtomWithIdx(atom_idx).GetSymbol()
+                charge = self.mol.GetAtomWithIdx(atom_idx).GetFormalCharge()
+                h_num = self.mol.GetAtomWithIdx(atom_idx).GetNumExplicitHs()
+
                 if atom_idx in self.hydro_nitro and \
                         [i for j in list(graph.edges) for i in j].count(atom_idx) < 3:
-                    list_atom_idx_types.append((i,
-                                                atom_idx,
-                                                self.mol.GetAtomWithIdx(atom_idx).GetSymbol(),
-                                                self.mol.GetAtomWithIdx(atom_idx).GetFormalCharge(),
-                                                self.mol.GetAtomWithIdx(atom_idx).GetNumExplicitHs() + 1
-                                                ))
-                else:
-                    list_atom_idx_types.append((i,
-                                                atom_idx,
-                                                self.mol.GetAtomWithIdx(atom_idx).GetSymbol(),
-                                                self.mol.GetAtomWithIdx(atom_idx).GetFormalCharge(),
-                                                self.mol.GetAtomWithIdx(atom_idx).GetNumExplicitHs()
-                                                ))
+                    h_num += 1
+                if atom_idx in self.c2o:
+                    charge += 2
+                    # h_num += 1
+                list_atom_idx_types.append((i,
+                                            atom_idx,
+                                            symbol,
+                                            charge,
+                                            h_num
+                                            ))
+
                 i += 1
             for edge in list(graph.edges):
                 list_bond_idx_types.append((edge[0],
@@ -319,6 +321,12 @@ class MolGraph(object):
             if[i for j in list(self.graph.edges) for i in j].count(nitro_index) >= 3:
                 aromatic_chained_nitro.append(nitro_index)
         return aromatic_chained_nitro
+
+    @property
+    def c2o(self):
+        return [atom.GetIdx() for atom in self.mol.GetAromaticAtoms() if atom.GetSymbol() == 'C' and atom.GetIdx()
+                in [i for j in [(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()) for bond in self.mol.GetBonds()
+                                if bond.GetBondType() == Chem.rdchem.BondType.DOUBLE] for i in j]]
 
 
 def get_mol_graph(smiles):

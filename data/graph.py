@@ -287,12 +287,17 @@ class MolGraph(object):
                     counts += 1
             if counts == 0:
                 sng_u.append(i_graph)
-        bond, co = self.c2o
+        co = self.c2o
+        so = self.s1o
         for j in range(len(sng_u)):
             for i in co:
                 if i in sng_u[j].nodes:
                     sng_u[j].add_node(co[i])
                     sng_u[j].add_edge(i, co[i])
+            for i in so:
+                if i in sng_u[j].nodes:
+                    sng_u[j].add_node(so[i])
+                    sng_u[j].add_edge(i, so[i])
         return sng_u
 
     @property
@@ -339,12 +344,27 @@ class MolGraph(object):
                 dic[bond[0]] = bond[1]
             else:
                 dic[bond[1]] = bond[0]
-        return aro_co, dic
+        return dic
         #return aro_co
 
         # return [atom.GetIdx() for atom in self.mol.GetAromaticAtoms() if atom.GetSymbol() == 'C' and atom.GetIdx()
         #         in [i for j in [(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()) for bond in self.mol.GetBonds()
         #                         if bond.GetBondType() == Chem.rdchem.BondType.DOUBLE] for i in j]]
+
+    @property
+    def s1o(self):
+        aro_s = [atom.GetIdx() for atom in self.mol.GetAromaticAtoms() if atom.GetSymbol() == 'S']
+        aro_so = [(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx(), get_bond_type(bond))
+                  for bond in self.mol.GetBonds() if get_bond_type(bond) == 1 and
+                  (bond.GetBeginAtomIdx() in aro_s or bond.GetEndAtomIdx() in aro_s)
+                  ]
+        dic = {}
+        for bond in aro_so:
+            if bond[0] in aro_s:
+                dic[bond[0]] = bond[1]
+            else:
+                dic[bond[1]] = bond[0]
+        return dic
 
 
 def get_mol_graph(smiles):

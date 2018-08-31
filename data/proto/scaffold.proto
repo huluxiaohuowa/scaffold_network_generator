@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+message LsAtom{
+    repeated int32 idx_atom = 1;
+}
+
+message DicMolLsatom{
+    int32 idx_mol = 1;
+    LsAtom ls_atom = 2;
+}
+
+message LsDicmollsatom{
+    repeated DicMolLsatom dic_mol_atoms = 1;
+}
+
+message DicScaffoldLs{
+    map<int32, LsDicmollsatom> idx_scaffold = 8;
+}

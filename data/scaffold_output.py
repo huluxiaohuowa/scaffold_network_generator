@@ -1,6 +1,7 @@
 from data import graph
 from rdkit import Chem
 from os import path
+from .proto import *
 
 
 def get_sng_from_smiles(smiles):
@@ -17,14 +18,14 @@ def get_sng_from_smiles(smiles):
     return ls_mol_atom_idx
 
 
-def output_to_file(smiles, output_file='output.txt'):
-    output_dir = path.join(path.dirname(__file__),
-                           'datasets',
-                           output_file)
-    ls_mol_atom_idx = get_sng_from_smiles(smiles)
-    with open(output_dir, 'a+') as f:
-        for i in ls_mol_atom_idx:
-            f.write(smiles + '\t' + i[0] + '\t' + ','.join([str(x) for x in i[1]]) + '\n')
+# def output_to_file(smiles, output_file='output.txt'):
+#     output_dir = path.join(path.dirname(__file__),
+#                            'datasets',
+#                            output_file)
+#     ls_mol_atom_idx = get_sng_from_smiles(smiles)
+#     with open(output_dir, 'a+') as f:
+#         for i in ls_mol_atom_idx:
+#             f.write(smiles + '\t' + i[0] + '\t' + ','.join([str(x) for x in i[1]]) + '\n')s
 
 
 

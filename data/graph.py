@@ -16,11 +16,11 @@ class MolGraph(object):
         # self.aromatic_chained_nitro = []
 
     @property
+    # 删去所有原子都为公用原子的环（去重）
     def sssr(self):
-        list_sssr = []
-        for ring in rdmolops.GetSymmSSSR(self.mol):
-            list_sssr.append(list(ring))
-            sssr_copy2 = deepcopy(list_sssr)
+        list_sssr = self.sssr_list()    # 引用一下，降低代码可读性
+        # list_sssr = [list(ring) for ring in rdmolops.GetSymmSSSR(self.mol)]
+        sssr_copy2 = deepcopy(list_sssr)
         if len(list_sssr) > self.mol.GetNumBonds() - self.mol.GetNumAtoms() + 1:
             sssr_copy, sssr_label = label_gen(list_sssr)
             counts = 0
@@ -34,11 +34,9 @@ class MolGraph(object):
         return sssr_copy2
 
     @property
+    # 返回每个环的原子序号list 的list
     def sssr_list(self):
-        list_sssr = []
-        for ring in rdmolops.GetSymmSSSR(self.mol):
-            list_sssr.append(list(ring))
-        return list_sssr
+        return [list(ring) for ring in rdmolops.GetSymmSSSR(self.mol)]
 
     @property
     def graph(self):

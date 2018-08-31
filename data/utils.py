@@ -98,6 +98,8 @@ def index_to_bond(idx):
 #     mol.AddBond(begin_id, end_id, BOND_ORDERS[idx])
 
 
+# 返回sssr_copy = sssr_list （成环原子list的list）
+# sssr_label 为相应原子的标记list的list，其中多次参与成环的原子为0，其余为1
 def label_gen(sssr):
     sssr_copy = deepcopy(sssr)
     sssr_label = deepcopy(sssr)

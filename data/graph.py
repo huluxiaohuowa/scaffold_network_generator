@@ -18,7 +18,7 @@ class MolGraph(object):
     @property
     # 删去所有原子都为公用原子的环（去重）
     def sssr(self):
-        list_sssr = self.sssr_list()    # 引用一下，降低代码可读性
+        list_sssr = self.sssr_list   # 引用一下，降低代码可读性
         # list_sssr = [list(ring) for ring in rdmolops.GetSymmSSSR(self.mol)]
         sssr_copy2 = deepcopy(list_sssr)
         if len(list_sssr) > self.mol.GetNumBonds() - self.mol.GetNumAtoms() + 1:

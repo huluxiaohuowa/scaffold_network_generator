@@ -2,6 +2,7 @@ from data import graph
 from rdkit import Chem
 from os import path
 from .proto import *
+import linecache
 
 
 def get_sng_from_smiles(smiles):
@@ -17,16 +18,39 @@ def get_sng_from_smiles(smiles):
                                 ls_atom_idx))
     return ls_mol_atom_idx
 
+def get_sng_protobuf(input_file):
 
-# def output_to_file(smiles, output_file='output.txt'):
-#     output_dir = path.join(path.dirname(__file__),
-#                            'datasets',
-#                            output_file)
-#     ls_mol_atom_idx = get_sng_from_smiles(smiles)
-#     with open(output_dir, 'a+') as f:
-#         for i in ls_mol_atom_idx:
-#             f.write(smiles + '\t' + i[0] + '\t' + ','.join([str(x) for x in i[1]]) + '\n')s
+    # 初始化scaffold字典和 protobuf数据集
+    scaffold_dict = DicIdxScaffolds()
+    dataset = DicScaffoldLs()
 
+    # 为方便后面再套循环，先随便初始化一个分子index
+    for mol_index in range(get_num_lines(input_file)):
+        smiles = linecache.getline(input_file, mol_index + 1).strip()
+        sng_test = get_sng_from_smiles(smiles)
+
+        # 遍历正在处理的分子的scaffold
+        for mol_sng_index in range(len(sng_test)):
+            sng_now, sng_atoms = sng_test[mol_sng_index]  # 获取当前的scaffold骨架 smiles 及 骨架原子的list
+            sng_dict_index = -1
+            sng_dict_len = len(scaffold_dict.dic_scaffold)  # scaffold dict 长度
+            for sng_dict_index_tmp in range(sng_dict_len):  # 在scaffold dict里查重
+                if sng_now == scaffold_dict.dic_scaffold[sng_dict_index_tmp]:
+                    sng_dict_index = sng_dict_index_tmp
+                    break
+            if sng_dict_index == -1:  # 表明该scaffold未出现过
+                scaffold_dict.dic_scaffold[sng_dict_len] = sng_now
+                sng_dict_index = sng_dict_len
+
+            # 初始化Dicmollsatom
+            sng_pb = DicMolLsatom()
+            sng_pb.idx_mol = mol_index
+            sng_pb.ls_atom.idx_atom.extend(sng_atoms)
+
+            # 将该scaffold对应的 当前正在处理的mol_id和atom_list添加到dataset当中
+            dataset.idx_scaffold[sng_dict_index].dic_mol_atoms.extend([sng_pb])
+
+    return scaffold_dict, dataset
 
 input_file = "input_10.txt"
 input_dir = path.join(path.dirname(__file__),

@@ -10,6 +10,10 @@ BOND_ORDERS = [Chem.BondType.AROMATIC,
                Chem.BondType.DOUBLE,
                Chem.BondType.TRIPLE]
 
+def get_num_lines(file):
+    for num_lines, line in enumerate(open(input_file,'r')):
+        pass
+    return num_lines + 1
 
 def get_atom_type(atom):
     atom_symbol = ATOM_SYMBOLS.index(atom.GetSymbol())

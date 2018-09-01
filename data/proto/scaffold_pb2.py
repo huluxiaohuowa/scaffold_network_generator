@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0escaffold.proto\"\x1a\n\x06LsAtom\x12\x10\n\x08idx_atom\x18\x01 \x03(\x05\"9\n\x0c\x44icMolLsatom\x12\x0f\n\x07idx_mol\x18\x01 \x01(\x05\x12\x18\n\x07ls_atom\x18\x02 \x01(\x0b\x32\x07.LsAtom\"6\n\x0eLsDicmollsatom\x12$\n\rdic_mol_atoms\x18\x01 \x03(\x0b\x32\r.DicMolLsatom\"\x8b\x01\n\rDicScaffoldLs\x12\x35\n\x0cidx_scaffold\x18\x08 \x03(\x0b\x32\x1f.DicScaffoldLs.IdxScaffoldEntry\x1a\x43\n\x10IdxScaffoldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\x1e\n\x05value\x18\x02 \x01(\x0b\x32\x0f.LsDicmollsatom:\x02\x38\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x0escaffold.proto\"\x1a\n\x06LsAtom\x12\x10\n\x08idx_atom\x18\x01 \x03(\x05\"9\n\x0c\x44icMolLsatom\x12\x0f\n\x07idx_mol\x18\x01 \x01(\x05\x12\x18\n\x07ls_atom\x18\x02 \x01(\x0b\x32\x07.LsAtom\"6\n\x0eLsDicmollsatom\x12$\n\rdic_mol_atoms\x18\x01 \x03(\x0b\x32\r.DicMolLsatom\"\x8b\x01\n\rDicScaffoldLs\x12\x35\n\x0cidx_scaffold\x18\x08 \x03(\x0b\x32\x1f.DicScaffoldLs.IdxScaffoldEntry\x1a\x43\n\x10IdxScaffoldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\x1e\n\x05value\x18\x02 \x01(\x0b\x32\x0f.LsDicmollsatom:\x02\x38\x01\"~\n\x0f\x44icIdxScaffolds\x12\x37\n\x0c\x64ic_scaffold\x18\x07 \x03(\x0b\x32!.DicIdxScaffolds.DicScaffoldEntry\x1a\x32\n\x10\x44icScaffoldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x62\x06proto3')
 )
 
 
@@ -192,15 +192,86 @@ _DICSCAFFOLDLS = _descriptor.Descriptor(
   serialized_end=301,
 )
 
+
+_DICIDXSCAFFOLDS_DICSCAFFOLDENTRY = _descriptor.Descriptor(
+  name='DicScaffoldEntry',
+  full_name='DicIdxScaffolds.DicScaffoldEntry',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='key', full_name='DicIdxScaffolds.DicScaffoldEntry.key', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='DicIdxScaffolds.DicScaffoldEntry.value', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=_b('8\001'),
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=379,
+  serialized_end=429,
+)
+
+_DICIDXSCAFFOLDS = _descriptor.Descriptor(
+  name='DicIdxScaffolds',
+  full_name='DicIdxScaffolds',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='dic_scaffold', full_name='DicIdxScaffolds.dic_scaffold', index=0,
+      number=7, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[_DICIDXSCAFFOLDS_DICSCAFFOLDENTRY, ],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=303,
+  serialized_end=429,
+)
+
 _DICMOLLSATOM.fields_by_name['ls_atom'].message_type = _LSATOM
 _LSDICMOLLSATOM.fields_by_name['dic_mol_atoms'].message_type = _DICMOLLSATOM
 _DICSCAFFOLDLS_IDXSCAFFOLDENTRY.fields_by_name['value'].message_type = _LSDICMOLLSATOM
 _DICSCAFFOLDLS_IDXSCAFFOLDENTRY.containing_type = _DICSCAFFOLDLS
 _DICSCAFFOLDLS.fields_by_name['idx_scaffold'].message_type = _DICSCAFFOLDLS_IDXSCAFFOLDENTRY
+_DICIDXSCAFFOLDS_DICSCAFFOLDENTRY.containing_type = _DICIDXSCAFFOLDS
+_DICIDXSCAFFOLDS.fields_by_name['dic_scaffold'].message_type = _DICIDXSCAFFOLDS_DICSCAFFOLDENTRY
 DESCRIPTOR.message_types_by_name['LsAtom'] = _LSATOM
 DESCRIPTOR.message_types_by_name['DicMolLsatom'] = _DICMOLLSATOM
 DESCRIPTOR.message_types_by_name['LsDicmollsatom'] = _LSDICMOLLSATOM
 DESCRIPTOR.message_types_by_name['DicScaffoldLs'] = _DICSCAFFOLDLS
+DESCRIPTOR.message_types_by_name['DicIdxScaffolds'] = _DICIDXSCAFFOLDS
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 LsAtom = _reflection.GeneratedProtocolMessageType('LsAtom', (_message.Message,), dict(
@@ -239,6 +310,22 @@ DicScaffoldLs = _reflection.GeneratedProtocolMessageType('DicScaffoldLs', (_mess
 _sym_db.RegisterMessage(DicScaffoldLs)
 _sym_db.RegisterMessage(DicScaffoldLs.IdxScaffoldEntry)
 
+DicIdxScaffolds = _reflection.GeneratedProtocolMessageType('DicIdxScaffolds', (_message.Message,), dict(
+
+  DicScaffoldEntry = _reflection.GeneratedProtocolMessageType('DicScaffoldEntry', (_message.Message,), dict(
+    DESCRIPTOR = _DICIDXSCAFFOLDS_DICSCAFFOLDENTRY,
+    __module__ = 'scaffold_pb2'
+    # @@protoc_insertion_point(class_scope:DicIdxScaffolds.DicScaffoldEntry)
+    ))
+  ,
+  DESCRIPTOR = _DICIDXSCAFFOLDS,
+  __module__ = 'scaffold_pb2'
+  # @@protoc_insertion_point(class_scope:DicIdxScaffolds)
+  ))
+_sym_db.RegisterMessage(DicIdxScaffolds)
+_sym_db.RegisterMessage(DicIdxScaffolds.DicScaffoldEntry)
+
 
 _DICSCAFFOLDLS_IDXSCAFFOLDENTRY._options = None
+_DICIDXSCAFFOLDS_DICSCAFFOLDENTRY._options = None
 # @@protoc_insertion_point(module_scope)

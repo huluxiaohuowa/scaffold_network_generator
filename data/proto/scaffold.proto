@@ -16,3 +16,7 @@ message LsDicmollsatom{
 message DicScaffoldLs{
     map<int32, LsDicmollsatom> idx_scaffold = 8;
 }
+
+message DicIdxScaffolds{
+    map<int32, string> dic_scaffold = 7;
+}

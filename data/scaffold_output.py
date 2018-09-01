@@ -28,6 +28,8 @@ def get_sng_from_smiles(smiles):
 #             f.write(smiles + '\t' + i[0] + '\t' + ','.join([str(x) for x in i[1]]) + '\n')s
 
 
+input_file = "input_10.txt"
+input_file_dir = path.join
 
 
 

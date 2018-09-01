@@ -1,7 +1,7 @@
-from multiprocessing import Pool,Manager
-from os import path
-import data
-import linecache
+# from multiprocessing import Pool,Manager
+# from os import path
+# import data
+# import linecache
 
 # num_process = 30
 # input_file = 'input.txt'
@@ -29,5 +29,6 @@ import linecache
 #             data.output_to_file(get_smiles(i+1))
 #         except:
 #             print(get_smiles(i+1))
+from data import *
 
-
+dic_scaffold, pro_scaffold = get_sng_protobuf()

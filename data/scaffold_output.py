@@ -25,15 +25,15 @@ def get_sng_from_smiles(smiles):
     return ls_mol_atom_idx
 
 
-def get_sng_protobuf(input_file=input_dir):
+def get_sng_protobuf(file=input_dir):
 
     # 初始化scaffold字典和 protobuf数据集
     scaffold_dict = DicIdxScaffolds()
     dataset = DicScaffoldLs()
 
     # 为方便后面再套循环，先随便初始化一个分子index
-    for mol_index in range(get_num_lines(input_file)):
-        smiles = linecache.getline(input_file, mol_index + 1).strip()
+    for mol_index in range(get_num_lines(file)):
+        smiles = linecache.getline(file, mol_index + 1).strip()
         sng_test = get_sng_from_smiles(smiles)
 
         # 遍历正在处理的分子的scaffold

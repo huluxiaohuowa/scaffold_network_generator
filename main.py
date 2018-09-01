@@ -48,3 +48,5 @@ for i in range(data.get_num_lines(path.join(path.dirname(__file__),
     p.apply_async(data.sng_from_line_2_queue,
                   (i, q,)
                   )
+
+scaffold_dict, dataset = data.protobuf_from_queue(q)

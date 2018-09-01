@@ -29,3 +29,6 @@ def get_sng_from_smiles(smiles):
 
 
 
+
+
+

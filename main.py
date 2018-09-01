@@ -29,6 +29,22 @@
 #             data.output_to_file(get_smiles(i+1))
 #         except:
 #             print(get_smiles(i+1))
-from data import *
+# from data import *
+#
+# dic_scaffold, pro_scaffold = get_sng_protobuf()
+import data
+from multiprocessing import Manager, Pool
+from os import path
 
-dic_scaffold, pro_scaffold = get_sng_protobuf()
+manager = Manager()
+q = manager.Queue()
+
+p = Pool(processes=30)
+for i in range(data.get_num_lines(path.join(path.dirname(__file__),
+                                            'data',
+                                            'datasets',
+                                            'input.txt'
+                                            ))):
+    p.apply_async(data.sng_from_line_2_queue,
+                  (i, q,)
+                  )

@@ -36,7 +36,7 @@ def sng_from_line(idx=0, file=input_dir):
 
 
 def sng_from_line_2_queue(idx, q):
-    q.put({idx: sng_from_line(idx)})
+    q.put((idx, sng_from_line(idx)))
 
 
 def protobuf_from_queue(q):

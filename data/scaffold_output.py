@@ -29,7 +29,16 @@ def get_sng_from_smiles(smiles):
 
 
 input_file = "input_10.txt"
-input_file_dir = path.join
+input_dir = path.join(path.dirname(__file__),
+                           'datasets',
+                           input_file
+                           )
+
+
+
+
+
+
 
 
 

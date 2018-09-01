@@ -287,11 +287,16 @@ class MolGraph(object):
                 sng_u.append(i_graph)
         co = self.c2o
         so = self.s1o
+        no = self.n2o
         for j in range(len(sng_u)):
             for i in co:
                 if i in sng_u[j].nodes:
                     sng_u[j].add_node(co[i])
                     sng_u[j].add_edge(i, co[i])
+            for i in no:
+                if i in sng_u[j].nodes:
+                    sng_u[j].add_node(no[i])
+                    sng_u[j].add_edge(i, no[i])
             for i in so:
                 if i in sng_u[j].nodes:
                     sng_u[j].add_node(so[i])
@@ -323,7 +328,7 @@ class MolGraph(object):
     @property
     def hydro_nitro(self):
         aromatic_chained_nitro = []
-        aromatic_nitros= [a.GetIdx() for a in self.mol.GetAromaticAtoms() if a.GetSymbol() == 'N']
+        aromatic_nitros= [a.GetIdx() for a in self.mol.GetAromaticAtoms() if a.GetSymbol() == 'N' and a.GetFormalCharge() == 0]
         for nitro_index in aromatic_nitros:
             if[i for j in list(self.graph.edges) for i in j].count(nitro_index) >= 3:
                 aromatic_chained_nitro.append(nitro_index)
@@ -339,6 +344,21 @@ class MolGraph(object):
         dic = {}
         for bond in aro_co:
             if bond[0] in aro_c:
+                dic[bond[0]] = bond[1]
+            else:
+                dic[bond[1]] = bond[0]
+        return dic
+
+    @property
+    def n2o(self):
+        aro_n = [atom.GetIdx() for atom in self.mol.GetAromaticAtoms() if atom.GetSymbol() == 'N']
+        aro_no = [(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx(), get_bond_type(bond))
+                  for bond in self.mol.GetBonds() if get_bond_type(bond) == 2 and
+                  (bond.GetBeginAtomIdx() in aro_n or bond.GetEndAtomIdx() in aro_n)
+                  ]
+        dic = {}
+        for bond in aro_no:
+            if bond[0] in aro_n:
                 dic[bond[0]] = bond[1]
             else:
                 dic[bond[1]] = bond[0]

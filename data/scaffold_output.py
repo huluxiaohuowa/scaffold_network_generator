@@ -3,7 +3,13 @@ from rdkit import Chem
 from os import path
 from .proto import *
 import linecache
+from .utils import *
 
+input_file = 'input_10.txt'
+input_dir = path.join(path.dirname(__file__),
+                      'datasets',
+                      input_file
+                      )
 
 def get_sng_from_smiles(smiles):
     mol_graph = graph.get_mol_graph(smiles)
@@ -18,7 +24,8 @@ def get_sng_from_smiles(smiles):
                                 ls_atom_idx))
     return ls_mol_atom_idx
 
-def get_sng_protobuf(input_file):
+
+def get_sng_protobuf(input_file=input_dir):
 
     # 初始化scaffold字典和 protobuf数据集
     scaffold_dict = DicIdxScaffolds()
@@ -52,11 +59,7 @@ def get_sng_protobuf(input_file):
 
     return scaffold_dict, dataset
 
-input_file = "input_10.txt"
-input_dir = path.join(path.dirname(__file__),
-                           'datasets',
-                           input_file
-                           )
+
 
 
 

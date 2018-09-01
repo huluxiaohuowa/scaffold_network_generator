@@ -10,7 +10,7 @@ BOND_ORDERS = [Chem.BondType.AROMATIC,
                Chem.BondType.DOUBLE,
                Chem.BondType.TRIPLE]
 
-def get_num_lines(file):
+def get_num_lines(input_file):
     for num_lines, line in enumerate(open(input_file,'r')):
         pass
     return num_lines + 1

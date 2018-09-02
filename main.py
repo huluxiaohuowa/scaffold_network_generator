@@ -33,22 +33,12 @@
 #
 # dic_scaffold, pro_scaffold = get_sng_protobuf()
 import data
-from multiprocessing import Manager, Pool
-from os import path
+from multiprocessing import Manager
+# from os import path
 
 manager = Manager()
 q = manager.Queue()
 
-p = Pool(processes=30)
-for i in range(data.get_num_lines(path.join(path.dirname(__file__),
-                                            'data',
-                                            'datasets',
-                                            'input.txt'
-                                            ))):
-    p.apply_async(data.sng_from_line_2_queue,
-                  (i, q,)
-                  )
-p.close()
-p.join()
+data.sng_to_queue(q, processces=30, file='data/datasets/input.txt')
 
 scaffold_dict, dataset = data.protobuf_from_queue(q)

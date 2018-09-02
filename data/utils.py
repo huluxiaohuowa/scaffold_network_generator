@@ -242,4 +242,8 @@ def get_mol_from_graph_list(ls_ls_atom,
 #     mol_list = [get_mol_from_graph(X, A, sanitize) for X, A in graph_list]
 #     return mol_list
 
-
+def id_mol(mol):
+    atoms = mol.GetNumAtoms()
+    for idx in range(atoms):
+        mol.GetAtomWithIdx(idx).SetProp('molAtomMapNumber', str(mol.GetAtomWithIdx(idx).GetIdx()))
+    return mol

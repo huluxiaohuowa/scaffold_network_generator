@@ -4,13 +4,13 @@ message LsAtom{
     repeated int32 idx_atom = 1;
 }
 
-message DicMolLsatom{
+message TupMolLsatom{
     int32 idx_mol = 1;
     LsAtom ls_atom = 2;
 }
 
 message LsDicmollsatom{
-    repeated DicMolLsatom dic_mol_atoms = 1;
+    repeated TupMolLsatom dic_mol_atoms = 1;
 }
 
 message DicScaffoldLs{

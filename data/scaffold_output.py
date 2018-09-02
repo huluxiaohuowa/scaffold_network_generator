@@ -52,6 +52,11 @@ def sng_to_queue(q, processes=30, file=input_dir):
 
 
 def protobuf_from_queue(q):
+    """
+    我大概想试一下怎么改……
+    :param q:
+    :return:
+    """
     scaffold_dict = DicIdxScaffolds()
     dataset = DicScaffoldLs()
     file = q.get()

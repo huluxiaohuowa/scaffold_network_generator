@@ -39,6 +39,6 @@ from multiprocessing import Manager
 manager = Manager()
 q = manager.Queue()
 
-data.sng_to_queue(q, processces=30, file='data/datasets/input.txt')
+data.sng_to_queue(q, processes=30, file='data/datasets/input.txt')
 
 scaffold_dict, dataset = data.protobuf_from_queue(q)

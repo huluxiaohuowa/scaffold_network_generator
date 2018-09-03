@@ -36,8 +36,8 @@ import data
 from multiprocessing import Manager
 # from os import path
 
-manager = Manager()
-q = manager.Queue()
+
+q = Manager().Queue()
 
 data.sng_to_queue(q, processes=30, file='data/datasets/input.txt')
 

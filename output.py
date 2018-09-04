@@ -1,6 +1,6 @@
 
 import data
-from multiprocessing import Manager
+from multiprocessing import Manager, cpu_count
 from data import *
 import argparse
 parser = argparse.ArgumentParser()
@@ -27,7 +27,7 @@ else:
 
 q = Manager().Queue()
 
-data.sng_to_queue(q, processes=30, file=file_input)
+data.sng_to_queue(q, processes=cpu_count()-1, file=file_input)
 
 dic = data.data_from_queue(q)
 

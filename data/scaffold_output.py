@@ -50,13 +50,13 @@ def sng_to_queue(q, processes=30, file=input_dir):
 
 def scaffold_smiles_idx(idx, file=path.join(path.dirname(__file__),
                                      'datasets',
-                                     'scaffold.smi')):
+                                     'scaffolds.smi')):
     return smiles_from_line(idx, file=file)
 
 
 def scaffold_mol_idx(idx, file=path.join(path.dirname(__file__),
                                      'datasets',
-                                     'scaffold.smi')):
+                                     'scaffolds.smi')):
     return Chem.MolFromSmiles(scaffold_smiles_idx(idx=idx, file=file))
 
 

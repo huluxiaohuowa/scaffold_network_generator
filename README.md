@@ -1,13 +1,13 @@
 # Scaffold Network Generator
 ## Usage
 ```bash
-python output.py --file_input=data/datasets/input.txt --file_output=data/datasets/scaffolds.bin --np=50
+python output.py --np=50 --file_input=data/datasets/input.txt --scaffolds_output=data/datasets/scaffolds.smi --file_output=data/datasets/scaffolds.bin 
 ```
 ## Read the entire scaffolds message from a file
 ```python
 from data import *
 dic = DicSmScaffoldLs()
-with open('scaffolds.bin','rb') as f:
+with open('data/datasets/scaffolds.bin','rb') as f:
     dic.ParseFromString(f.read())
 
 print(len(dic.smiles_scaffold))

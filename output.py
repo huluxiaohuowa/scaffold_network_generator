@@ -19,7 +19,6 @@ parser.add_argument("--file_output",
                                       'datasets',
                                       'scaffolds.bin'))
 parser.add_argument("--np",
-                    metavar='np',
                     help="Count of processes",
                     type=int,
                     default=cpu_count()-1)

@@ -57,7 +57,7 @@ idx_atom: 28
 idx_atom: 29
 ```
 
-### The $6^{th}$ scaffold
+### The 6th scaffold
 
 ```python
 Chem.MolFromSmiles(scaffold_smiles_idx(6))
@@ -67,7 +67,7 @@ Chem.MolFromSmiles(scaffold_smiles_idx(6))
 
 ![png](images/output_2_0.png)
 
-### The $59259^{th}$ molecule containing the $6^{th}$ scaffold
+### The 59,259th molecule containing the 6th scaffold
 
 ```python
 Chem.MolFromSmiles(smiles_from_line(59259))

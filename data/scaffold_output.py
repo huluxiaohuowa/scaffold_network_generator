@@ -88,7 +88,7 @@ def scaffold_mol_idx(idx, file=path.join(path.dirname(__file__),
 #     return scaffold_dict, dataset
 
 
-def data_from_queue(q):
+def data_from_queue(q, print_step=5000):
     """
     get protobuf message from a queue
     :param: queue
@@ -97,7 +97,7 @@ def data_from_queue(q):
     dic_scaffold = DicSmScaffoldLs()
     file = q.get()
     for i in range(get_num_lines(file)):
-        if i % 5000 == 0:
+        if i % print_step == 0:
             print(i)
         mol_index, sng = q.get()
         for sm_sng, idx_atoms in sng:

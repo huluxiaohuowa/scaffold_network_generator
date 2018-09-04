@@ -14,5 +14,6 @@ dic = data.data_from_queue(q)
 
 print(dic.smiles_scaffold[scaffold_mol_idx(2)])
 
-
+with open('data/datasets/scaffolds.bin', 'wb') as f:
+    f.write(dic.SerializeToString())
 

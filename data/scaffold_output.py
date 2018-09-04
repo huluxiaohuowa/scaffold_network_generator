@@ -1,6 +1,4 @@
 from data import graph
-from rdkit import Chem
-from os import path
 from .proto import *
 import linecache
 from .utils import *

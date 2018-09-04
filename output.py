@@ -18,14 +18,15 @@ parser.add_argument("--file_output",
                                       'data',
                                       'datasets',
                                       'scaffolds.bin'))
-parser.add_argument("-n",
+parser.add_argument("--np",
+                    metavar='np',
                     help="Count of processes",
                     type=int,
                     default=cpu_count()-1)
 args = parser.parse_args()
 q = Manager().Queue()
-data.sng_to_queue(q, processes=n, file=file_input)
+data.sng_to_queue(q, processes=args.np, file=args.file_input)
 dic = data.data_from_queue(q)
-with open(file_output, 'wb') as f:
+with open(args.file_output, 'wb') as f:
     f.write(dic.SerializeToString())
 

@@ -102,7 +102,7 @@ ENV/
 
 .idea
 ref
-.data/datasets/*.*
+.data/datasets/
 
 # vscode
 .vscode/

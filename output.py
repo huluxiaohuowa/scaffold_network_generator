@@ -11,6 +11,13 @@ parser.add_argument("--file_input",
                                       'data',
                                       'datasets',
                                       'input.txt'))
+parser.add_argument("--scaffolds_output",
+                    help="The location of scaffold SMILES file",
+                    type=str,
+                    default=path.join(path.dirname(__file__),
+                                      'data',
+                                      'datasets',
+                                      'scaffolds.smi'))
 parser.add_argument("--file_output",
                     help="The location of output file",
                     type=str,
@@ -28,4 +35,8 @@ data.sng_to_queue(q, processes=args.np, file=args.file_input)
 dic = data.data_from_queue(q)
 with open(args.file_output, 'wb') as f:
     f.write(dic.SerializeToString())
+with open(args.scaffolds_output, 'w') as f:
+    for i in dic.smiles_scaffold.keys():
+        f.write(i + '\n')
+
 

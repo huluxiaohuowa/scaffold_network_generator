@@ -50,17 +50,31 @@ def sng_to_queue(q, processes=30, file=input_dir):
     p.join()
 
 
+def scaffold_smiles_idx(idx, file=path.join(path.dirname(__file__),
+                                     'datasets',
+                                     'scaffold.smi')):
+    return smiles_from_line(idx, file=file)
+
+
+def scaffold_mol_idx(idx, file=path.join(path.dirname(__file__),
+                                     'datasets',
+                                     'scaffold.smi')):
+    return Chem.MolFromSmiles(scaffold_smiles_idx(idx=idx, file=file))
+
+
 def protobuf_from_queue(q):
     """
     get protobuf message from a queue
     :param: queue
-    :return: dict{scaffold idx: scaffold smiles} dict{scaffold idx: (mol idx, [atom idx])}
+    :return: dict{scaffold idx: scaffold smiles}, dict{scaffold idx: (mol idx, [atom idx])}
     """
     scaffold_dict = DicIdxScaffolds()
     dataset = DicScaffoldLs()
     sng_dict_index = -1
     file = q.get()
     for i in range(get_num_lines(file)):
+        if i % 5000 == 0:
+            print(i)
         mol_index, sng = q.get()
         for mol_sng_index in range(len(sng)):
             sng_now, sng_atoms = sng[mol_sng_index]  # 获取当前的scaffold骨架smiles及骨架原子的list
@@ -72,6 +86,26 @@ def protobuf_from_queue(q):
             sng_pb.ls_atom.idx_atom.extend(sng_atoms)
             dataset.idx_scaffold[sng_dict_index].dic_mol_atoms.extend([sng_pb])
     return scaffold_dict, dataset
+
+
+def data_from_queue(q):
+    """
+    get protobuf message from a queue
+    :param: queue
+    :return:  dict{scaffold smiles: (mol idx, [atom idx])}
+    """
+    dic_scaffold = DicSmScaffoldLs()
+    file = q.get()
+    for i in range(get_num_lines(file)):
+        if i % 5000 == 0:
+            print(i)
+        mol_index, sng = q.get()
+        for sm_sng, idx_atoms in sng:
+            sng_pb = TupMolLsatom()
+            sng_pb.idx_mol = mol_index
+            sng_pb.ls_atom.idx_atom.extend(idx_atoms)
+            dic_scaffold.smiles_scaffold[sm_sng].dic_mol_atoms.extend([sng_pb])
+    return dic_scaffold
 
 # def protobuf_from_queue(q):
 #     """
@@ -130,7 +164,6 @@ def protobuf_from_file(file=input_dir):
             sng_pb.ls_atom.idx_atom.extend(sng_atoms)
             # 将该scaffold对应的 当前正在处理的mol_id和atom_list添加到dataset当中
             dataset.idx_scaffold[sng_dict_index].dic_mol_atoms.extend([sng_pb])
-
     return scaffold_dict, dataset
 
 

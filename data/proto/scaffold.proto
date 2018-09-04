@@ -20,3 +20,7 @@ message DicScaffoldLs{
 message DicIdxScaffolds{
     map<int32, string> dic_scaffold = 7;
 }
+
+message DicSmScaffoldLs{
+    map<string, LsDicmollsatom> smiles_scaffold = 8;
+}

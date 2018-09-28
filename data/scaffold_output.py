@@ -1,11 +1,14 @@
-from data import graph
+from rdkit import Chem
+
+from data.utils import get_num_lines
+from . import graph
 from .proto import *
 import linecache
-from .utils import *
 from multiprocessing import Pool
+from os import path
 
 # input_file = 'input_10.txt'
-input_file = 'input.txt'
+input_file = 'input.smi'
 input_dir = path.join(path.dirname(__file__),
                       'datasets',
                       input_file
@@ -13,6 +16,19 @@ input_dir = path.join(path.dirname(__file__),
 
 
 def get_sng_from_smiles(smiles):
+    """
+
+    Parameters
+    ----------
+        smiles: str
+            A molecule SMILES
+
+    Returns
+        ls_mol_atom_idx: list
+            list of tuples
+    -------
+
+    """
     mol_graph = graph.get_mol_graph(smiles)
     ls_atom, ls_bond = mol_graph.graph_list_to_list()
     ls_scaffold = mol_graph.ls_mol_from_sng_u()
@@ -39,6 +55,21 @@ def sng_from_line_2_queue(idx, q, file=input_dir):
 
 
 def sng_to_queue(q, processes=30, file=input_dir):
+    """
+
+    Parameters
+    ----------
+    q : multiprocessing.Manager().Queue
+        queue
+    processes : int
+        num of processes
+    file : str
+        input file dir
+
+    Returns
+    -------
+
+    """
     q.put(file)
     p = Pool(processes=processes)
     for i in range(get_num_lines(file)):
@@ -51,6 +82,7 @@ def sng_to_queue(q, processes=30, file=input_dir):
 def scaffold_smiles_idx(idx, file=path.join(path.dirname(__file__),
                                             'datasets',
                                             'scaffolds.smi')):
+
     return smiles_from_line(idx, file=file)
 
 
@@ -88,21 +120,49 @@ def scaffold_mol_idx(idx, file=path.join(path.dirname(__file__),
 
 def data_from_queue(q, print_step=5000):
     """
-    get protobuf message from a queue
-    :param: queue
-    :return:  dict{scaffold smiles: (mol idx, [atom idx])}
+
+    Parameters
+    ----------
+    q: queue
+        queue
+    print_step : int
+
+    Returns
+    -------
+    dic_scaffold
+        dict{scaffold smiles: (mol idx, [atom idx])}
     """
     dic_scaffold = DicSmScaffoldLs()
     file = q.get()
-    for i in range(get_num_lines(file)):
+    print("Extracting scaffolds from" + file)
+    i = 0
+    num_lines = get_num_lines(file)
+    while True:
+        i += 1
         if i % print_step == 0:
             print(i)
-        mol_index, sng = q.get()
-        for sm_sng, idx_atoms in sng:
-            sng_pb = TupMolLsatom()
-            sng_pb.idx_mol = mol_index
-            sng_pb.ls_atom.idx_atom.extend(idx_atoms)
-            dic_scaffold.smiles_scaffold[sm_sng].dic_mol_atoms.extend([sng_pb])
+        if i > num_lines:
+            break
+        try:
+            mol_index, sng = q.get_nowait()
+            for sm_sng, idx_atoms in sng:
+                sng_pb = TupMolLsatom()
+                sng_pb.idx_mol = mol_index
+                sng_pb.ls_atom.idx_atom.extend(idx_atoms)
+                dic_scaffold.smiles_scaffold[sm_sng].dic_mol_atoms.extend([sng_pb])
+        except:
+            continue
+
+    #
+    # for i in range(get_num_lines(file)):
+    #     if i % print_step == 0:
+    #         print(i)
+    #     mol_index, sng = q.get_nowait()
+    #     for sm_sng, idx_atoms in sng:
+    #         sng_pb = TupMolLsatom()
+    #         sng_pb.idx_mol = mol_index
+    #         sng_pb.ls_atom.idx_atom.extend(idx_atoms)
+    #         dic_scaffold.smiles_scaffold[sm_sng].dic_mol_atoms.extend([sng_pb])
     return dic_scaffold
 
 # def protobuf_from_queue(q):

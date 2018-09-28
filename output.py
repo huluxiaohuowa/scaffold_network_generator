@@ -1,8 +1,9 @@
-import data
 from multiprocessing import Manager, cpu_count
 from data import *
 import argparse
 from os import path
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--file_input",
                     help="The location of input file",
@@ -31,8 +32,8 @@ parser.add_argument("--np",
                     default=cpu_count()-1)
 args = parser.parse_args()
 q = Manager().Queue()
-data.sng_to_queue(q, processes=args.np, file=args.file_input)
-dic = data.data_from_queue(q)
+sng_to_queue(q, processes=args.np, file=args.file_input)
+dic = data_from_queue(q)
 with open(args.file_output, 'wb') as f:
     f.write(dic.SerializeToString())
 with open(args.scaffolds_output, 'w') as f:

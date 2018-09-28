@@ -1,28 +1,29 @@
-from .utils import *
 from rdkit import Chem
 import networkx as nx
 from rdkit.Chem import rdmolops
 from collections import Counter
 from copy import deepcopy
+from . import utils
 
-__all__ = ['MolGraph',
-           'get_mol_graph'
+__all__ = ['get_mol_graph'
            ]
 
 
 class MolGraph(object):
     def __init__(self, smiles):
         self.mol = Chem.MolFromSmiles(smiles)
-        # self.aromatic_chained_nitro = []
 
     @property
-    # 删去所有原子都为公用原子的环（去重）
     def sssr(self):
+        """
+        删去所有原子都为公用原子的环（去重）
+        :return:
+        """
         list_sssr = self.sssr_list   # 引用一下，降低代码可读性
         # list_sssr = [list(ring) for ring in rdmolops.GetSymmSSSR(self.mol)]
         sssr_copy2 = deepcopy(list_sssr)
         if len(list_sssr) > self.mol.GetNumBonds() - self.mol.GetNumAtoms() + 1:
-            sssr_copy, sssr_label = label_gen(list_sssr)
+            sssr_copy, sssr_label = utils.label_gen(list_sssr)
             counts = 0
             delta = len(list_sssr) - (self.mol.GetNumBonds() - self.mol.GetNumAtoms() + 1)
             for i in range(len(sssr_label)):
@@ -34,17 +35,20 @@ class MolGraph(object):
         return sssr_copy2
 
     @property
-    # 返回每个环的原子序号list 的list
     def sssr_list(self):
+        """
+        返回每个环的原子序号list 的list
+        :return:
+        """
         return [list(ring) for ring in rdmolops.GetSymmSSSR(self.mol)]
 
     @property
     def graph(self):
         atom_types, bonds, bond_types = [], [], []
         for atom in self.mol.GetAtoms():
-            atom_types.append(get_atom_type(atom))
+            atom_types.append(utils.get_atom_type(atom))
         for bond in self.mol.GetBonds():
-            idx_1, idx_2, bond_type = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx(), get_bond_type(bond)
+            idx_1, idx_2, bond_type = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx(), utils.get_bond_type(bond)
             bonds.append([idx_1, idx_2])
             bond_types.append(bond_type)
         # build graph
@@ -99,8 +103,9 @@ class MolGraph(object):
                 h_num = self.mol.GetAtomWithIdx(atom_idx).GetNumExplicitHs()
 
                 if atom_idx in self.hydro_nitro and \
-                        [i for j in list(graph.edges) for i in j].count(atom_idx) < 3:
-                    h_num += 1
+                         [i for j in list(graph.edges) for i in j].count(atom_idx) < 3:
+                    # h_num += 1
+                    charge = -1
 
                 list_atom_idx_types.append((i,
                                             atom_idx,
@@ -113,7 +118,7 @@ class MolGraph(object):
             for edge in list(graph.edges):
                 list_bond_idx_types.append((edge[0],
                                             edge[1],
-                                            get_bond_type(self.mol.GetBondBetweenAtoms(edge[0], edge[1]))
+                                            utils.get_bond_type(self.mol.GetBondBetweenAtoms(edge[0], edge[1]))
                                             ))
             list_list_atom_idx_types.append(list_atom_idx_types)
             list_list_bond_idx_types.append(list_bond_idx_types)
@@ -139,7 +144,8 @@ class MolGraph(object):
             for bond in ls_bond:
                 ls_bond_new.append((dic[bond[0]], dic[bond[1]], bond[2]))
 
-            mol = get_mol_from_graph(ls_atom_new, ls_bond_new, sanitize)
+
+            mol = utils.get_mol_from_graph(ls_atom_new, ls_bond_new, sanitize)
             if mol is None:
                 print(Chem.MolToSmiles(self.mol))
             ls_mol.append(mol)
@@ -150,23 +156,36 @@ class MolGraph(object):
         if graph is None:
             graph = self.graph
         murko = deepcopy(graph)
-        if nx.is_connected(murko):
-            while True:
-                i = 0
-                nodes = []
-                for edge in list(murko.edges):
-                    for item in edge:
-                        nodes.append(item)
-                counter = Counter(nodes)
-                for node in counter:
-                    if counter[node] == 1:
-                        i += 1
-                        murko.remove_node(node)
-                if i == 0:
-                    break
-        else:
-            raise ValueError
+        chains = deepcopy(graph)
+        for sssr in self.sssr_list:
+            chains.remove_nodes_from(sssr)
+        ls_chains = list(nx.connected_component_subgraphs(chains))
+        for chain in ls_chains:
+            A = deepcopy(murko)
+            A.remove_nodes_from(chain)
+            if nx.is_connected(A):
+                murko.remove_nodes_from(chain)
         return murko
+
+
+
+        # if nx.is_connected(murko):
+        #     while True:
+        #         i = 0
+        #         nodes = []
+        #         for edge in list(murko.edges):
+        #             for item in edge:
+        #                 nodes.append(item)
+        #         counter = Counter(nodes)
+        #         for node in counter:
+        #             if counter[node] == 1:
+        #                 i += 1
+        #                 murko.remove_node(node)
+        #         if i == 0:
+        #             break
+        # else:
+        #     raise ValueError
+        # return murko
 
     def get_next_level_ring_assemblies_graph(self, igraph=None, irings=None):
         graph_next_level = []
@@ -238,7 +257,7 @@ class MolGraph(object):
             sssr = deepcopy(self.sssr)
         else:
             sssr = deepcopy(isssr)
-        d_sssr = d_sssr_single(sssr)
+        d_sssr = utils.d_sssr_single(sssr)
         if nx.is_connected(graph):
             murko = self.get_murko_graph(graph)
             if len(d_sssr) == 0:
@@ -250,7 +269,7 @@ class MolGraph(object):
                     if len(murko_copy) > 0 and nx.is_connected(murko_copy):
                         murko_copy = self.get_murko_graph(murko_copy)
                         graph_next_level.append(murko_copy)
-                        sssr_next_level.append(next_sssr(sssr, dd_sssr))
+                        sssr_next_level.append(utils.next_sssr(sssr, dd_sssr))
         else:
             raise ValueError
         return graph_next_level, sssr_next_level
@@ -281,7 +300,7 @@ class MolGraph(object):
         for i_graph in self.ra_sng:
             counts = 0
             for i_sng in sng_u:
-                if graph_eq(i_graph, i_sng):
+                if utils.graph_eq(i_graph, i_sng):
                     counts += 1
             if counts == 0:
                 sng_u.append(i_graph)
@@ -337,8 +356,8 @@ class MolGraph(object):
     @property
     def c2o(self):
         aro_c = [atom.GetIdx() for atom in self.mol.GetAromaticAtoms() if atom.GetSymbol() == 'C']
-        aro_co = [(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx(), get_bond_type(bond))
-                  for bond in self.mol.GetBonds() if get_bond_type(bond) == 2 and
+        aro_co = [(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx(), utils.get_bond_type(bond))
+                  for bond in self.mol.GetBonds() if utils.get_bond_type(bond) == 2 and
                   (bond.GetBeginAtomIdx() in aro_c or bond.GetEndAtomIdx() in aro_c)
                   ]
         dic = {}
@@ -352,8 +371,8 @@ class MolGraph(object):
     @property
     def n2o(self):
         aro_n = [atom.GetIdx() for atom in self.mol.GetAromaticAtoms() if atom.GetSymbol() == 'N']
-        aro_no = [(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx(), get_bond_type(bond))
-                  for bond in self.mol.GetBonds() if get_bond_type(bond) == 2 and
+        aro_no = [(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx(), utils.get_bond_type(bond))
+                  for bond in self.mol.GetBonds() if utils.get_bond_type(bond) == 2 and
                   (bond.GetBeginAtomIdx() in aro_n or bond.GetEndAtomIdx() in aro_n)
                   ]
         dic = {}
@@ -372,8 +391,8 @@ class MolGraph(object):
     @property
     def s1o(self):
         aro_s = [atom.GetIdx() for atom in self.mol.GetAromaticAtoms() if atom.GetSymbol() == 'S']
-        aro_so = [(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx(), get_bond_type(bond))
-                  for bond in self.mol.GetBonds() if get_bond_type(bond) == 1 and
+        aro_so = [(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx(), utils.get_bond_type(bond))
+                  for bond in self.mol.GetBonds() if utils.get_bond_type(bond) == 1 and
                   (bond.GetBeginAtomIdx() in aro_s or bond.GetEndAtomIdx() in aro_s)
                   ]
         dic = {}

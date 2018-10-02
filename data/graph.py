@@ -1,16 +1,15 @@
 from rdkit import Chem
 import networkx as nx
 from rdkit.Chem import rdmolops
-from collections import Counter
 from copy import deepcopy
 from . import utils
 
-__all__ = ['get_mol_graph'
-           ]
+__all__ = ['get_mol_graph', ]
 
 
 class MolGraph(object):
     def __init__(self, smiles):
+        self.smiles = smiles
         self.mol = Chem.MolFromSmiles(smiles)
 
     @property
@@ -91,38 +90,43 @@ class MolGraph(object):
     def graph_list_to_list(self, graph_list=None):
         list_list_atom_idx_types = []
         list_list_bond_idx_types = []
-        if graph_list is None:
+        if graph_list is None and any(self.sssr):
             graph_list = self.sng_unique
-        for graph in graph_list:
-            list_atom_idx_types = []
-            list_bond_idx_types = []
-            i = 0
-            for atom_idx in list(graph.nodes):
-                symbol = self.mol.GetAtomWithIdx(atom_idx).GetSymbol()
-                charge = self.mol.GetAtomWithIdx(atom_idx).GetFormalCharge()
-                h_num = self.mol.GetAtomWithIdx(atom_idx).GetNumExplicitHs()
+            for graph in graph_list:
+                list_atom_idx_types = []
+                list_bond_idx_types = []
+                i = 0
+                for atom_idx in list(graph.nodes):
+                    symbol = self.mol.GetAtomWithIdx(atom_idx).GetSymbol()
+                    charge = self.mol.GetAtomWithIdx(atom_idx).GetFormalCharge()
+                    h_num = self.mol.GetAtomWithIdx(atom_idx).GetNumExplicitHs()
 
-                if atom_idx in self.hydro_nitro and \
-                         [i for j in list(graph.edges) for i in j].count(atom_idx) < 3:
-                    # h_num += 1
-                    charge = -1
+                    if atom_idx in self.hydro_nitro and \
+                             [i for j in list(graph.edges) for i in j].count(atom_idx) < 3:
+                        h_num += 1
 
-                list_atom_idx_types.append((i,
-                                            atom_idx,
-                                            symbol,
-                                            charge,
-                                            h_num
-                                            ))
+                    if atom_idx in self.ar_n_plus and \
+                             [i for j in list(graph.edges) for i in j].count(atom_idx) < 3:
+                        charge -= 1
 
-                i += 1
-            for edge in list(graph.edges):
-                list_bond_idx_types.append((edge[0],
-                                            edge[1],
-                                            utils.get_bond_type(self.mol.GetBondBetweenAtoms(edge[0], edge[1]))
-                                            ))
-            list_list_atom_idx_types.append(list_atom_idx_types)
-            list_list_bond_idx_types.append(list_bond_idx_types)
-        return list_list_atom_idx_types, list_list_bond_idx_types
+                    list_atom_idx_types.append((i,
+                                                atom_idx,
+                                                symbol,
+                                                charge,
+                                                h_num
+                                                ))
+
+                    i += 1
+                for edge in list(graph.edges):
+                    list_bond_idx_types.append((edge[0],
+                                                edge[1],
+                                                utils.get_bond_type(self.mol.GetBondBetweenAtoms(edge[0], edge[1]))
+                                                ))
+                list_list_atom_idx_types.append(list_atom_idx_types)
+                list_list_bond_idx_types.append(list_bond_idx_types)
+            return list_list_atom_idx_types, list_list_bond_idx_types
+        else:
+            return None
 
     def ls_mol_from_sng_u(self,
                           ls_ls_atom=None,
@@ -130,26 +134,28 @@ class MolGraph(object):
                           sanitize=True
                           ):
         ls_mol = []
-        if not any((ls_ls_atom, ls_ls_bond)):
+        if (not any((ls_ls_atom, ls_ls_bond))) and any(self.sssr):
             ls_ls_atom, ls_ls_bond = self.graph_list_to_list()
-        for ls_atom, ls_bond in zip(ls_ls_atom, ls_ls_bond):
-            i = 0
-            dic = {}
-            ls_atom_new = []
-            ls_bond_new = []
-            for atom in ls_atom:
-                dic[atom[1]] = atom[0]
-                ls_atom_new.append((atom[2], atom[3], atom[4]))
-                i += 1
-            for bond in ls_bond:
-                ls_bond_new.append((dic[bond[0]], dic[bond[1]], bond[2]))
+            for ls_atom, ls_bond in zip(ls_ls_atom, ls_ls_bond):
+                i = 0
+                dic = {}
+                ls_atom_new = []
+                ls_bond_new = []
+                for atom in ls_atom:
+                    dic[atom[1]] = atom[0]
+                    ls_atom_new.append((atom[2], atom[3], atom[4]))
+                    i += 1
+                for bond in ls_bond:
+                    ls_bond_new.append((dic[bond[0]], dic[bond[1]], bond[2]))
 
 
-            mol = utils.get_mol_from_graph(ls_atom_new, ls_bond_new, sanitize)
-            if mol is None:
-                print(Chem.MolToSmiles(self.mol))
-            ls_mol.append(mol)
-        return ls_mol
+                mol = utils.get_mol_from_graph(ls_atom_new, ls_bond_new, sanitize)
+                if mol is None:
+                    print(Chem.MolToSmiles(self.mol))
+                ls_mol.append(mol)
+            return ls_mol
+        else:
+            return None
 
     # remove side chains
     def get_murko_graph(self, graph=None):
@@ -297,30 +303,33 @@ class MolGraph(object):
     @property
     def sng_unique(self):
         sng_u = []
-        for i_graph in self.ra_sng:
-            counts = 0
-            for i_sng in sng_u:
-                if utils.graph_eq(i_graph, i_sng):
-                    counts += 1
-            if counts == 0:
-                sng_u.append(i_graph)
-        co = self.c2o
-        so = self.s1o
-        no = self.n2o
-        for j in range(len(sng_u)):
-            for i in co:
-                if i in sng_u[j].nodes:
-                    sng_u[j].add_node(co[i])
-                    sng_u[j].add_edge(i, co[i])
-            for i in no:
-                if i in sng_u[j].nodes:
-                    sng_u[j].add_node(no[i])
-                    sng_u[j].add_edge(i, no[i])
-            for i in so:
-                if i in sng_u[j].nodes:
-                    sng_u[j].add_node(so[i])
-                    sng_u[j].add_edge(i, so[i])
-        return sng_u
+        if any(self.sssr):
+            for i_graph in self.ra_sng:
+                counts = 0
+                for i_sng in sng_u:
+                    if utils.graph_eq(i_graph, i_sng):
+                        counts += 1
+                if counts == 0:
+                    sng_u.append(i_graph)
+            co = self.c2o
+            so = self.s1o
+            no = self.n2o
+            for j in range(len(sng_u)):
+                for i in co:
+                    if i in sng_u[j].nodes:
+                        sng_u[j].add_node(co[i])
+                        sng_u[j].add_edge(i, co[i])
+                for i in no:
+                    if i in sng_u[j].nodes:
+                        sng_u[j].add_node(no[i])
+                        sng_u[j].add_edge(i, no[i])
+                for i in so:
+                    if i in sng_u[j].nodes:
+                        sng_u[j].add_node(so[i])
+                        sng_u[j].add_edge(i, so[i])
+            return sng_u
+        else:
+            return None
 
     @property
     def ra_sng(self):
@@ -402,6 +411,11 @@ class MolGraph(object):
             else:
                 dic[bond[1]] = bond[0]
         return dic
+
+    @property
+    def ar_n_plus(self):
+        aro_n_plus = [atom.GetIdx() for atom in self.mol.GetAromaticAtoms() if atom.GetSymbol() == 'N' and atom.GetFormalCharge() == 1]
+        return aro_n_plus
 
 
 def get_mol_graph(smiles):

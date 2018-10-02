@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0escaffold.proto\"\x1a\n\x06LsAtom\x12\x10\n\x08idx_atom\x18\x01 \x03(\x05\"9\n\x0cTupMolLsatom\x12\x0f\n\x07idx_mol\x18\x01 \x01(\x05\x12\x18\n\x07ls_atom\x18\x02 \x01(\x0b\x32\x07.LsAtom\"6\n\x0eLsDicmollsatom\x12$\n\rdic_mol_atoms\x18\x01 \x03(\x0b\x32\r.TupMolLsatom\"\x8b\x01\n\rDicScaffoldLs\x12\x35\n\x0cidx_scaffold\x18\x08 \x03(\x0b\x32\x1f.DicScaffoldLs.IdxScaffoldEntry\x1a\x43\n\x10IdxScaffoldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\x1e\n\x05value\x18\x02 \x01(\x0b\x32\x0f.LsDicmollsatom:\x02\x38\x01\"~\n\x0f\x44icIdxScaffolds\x12\x37\n\x0c\x64ic_scaffold\x18\x07 \x03(\x0b\x32!.DicIdxScaffolds.DicScaffoldEntry\x1a\x32\n\x10\x44icScaffoldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x98\x01\n\x0f\x44icSmScaffoldLs\x12=\n\x0fsmiles_scaffold\x18\x08 \x03(\x0b\x32$.DicSmScaffoldLs.SmilesScaffoldEntry\x1a\x46\n\x13SmilesScaffoldEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1e\n\x05value\x18\x02 \x01(\x0b\x32\x0f.LsDicmollsatom:\x02\x38\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x0escaffold.proto\"\x1a\n\x06LsAtom\x12\x10\n\x08idx_atom\x18\x01 \x03(\x05\"i\n\x0cTupMolLsatom\x12\x0f\n\x07idx_mol\x18\x01 \x01(\x05\x12\x18\n\x07ls_atom\x18\x02 \x01(\x0b\x32\x07.LsAtom\x12\x16\n\x05ls_nh\x18\x03 \x01(\x0b\x32\x07.LsAtom\x12\x16\n\x05ls_np\x18\x04 \x01(\x0b\x32\x07.LsAtom\"6\n\x0eLsDicmollsatom\x12$\n\rdic_mol_atoms\x18\x01 \x03(\x0b\x32\r.TupMolLsatom\"\x8b\x01\n\rDicScaffoldLs\x12\x35\n\x0cidx_scaffold\x18\x08 \x03(\x0b\x32\x1f.DicScaffoldLs.IdxScaffoldEntry\x1a\x43\n\x10IdxScaffoldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\x1e\n\x05value\x18\x02 \x01(\x0b\x32\x0f.LsDicmollsatom:\x02\x38\x01\"~\n\x0f\x44icIdxScaffolds\x12\x37\n\x0c\x64ic_scaffold\x18\x07 \x03(\x0b\x32!.DicIdxScaffolds.DicScaffoldEntry\x1a\x32\n\x10\x44icScaffoldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x98\x01\n\x0f\x44icSmScaffoldLs\x12=\n\x0fsmiles_scaffold\x18\x08 \x03(\x0b\x32$.DicSmScaffoldLs.SmilesScaffoldEntry\x1a\x46\n\x13SmilesScaffoldEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1e\n\x05value\x18\x02 \x01(\x0b\x32\x0f.LsDicmollsatom:\x02\x38\x01\x62\x06proto3')
 )
 
 
@@ -77,6 +77,20 @@ _TUPMOLLSATOM = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='ls_nh', full_name='TupMolLsatom.ls_nh', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='ls_np', full_name='TupMolLsatom.ls_np', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -90,7 +104,7 @@ _TUPMOLLSATOM = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=46,
-  serialized_end=103,
+  serialized_end=151,
 )
 
 
@@ -120,8 +134,8 @@ _LSDICMOLLSATOM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=105,
-  serialized_end=159,
+  serialized_start=153,
+  serialized_end=207,
 )
 
 
@@ -158,8 +172,8 @@ _DICSCAFFOLDLS_IDXSCAFFOLDENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=234,
-  serialized_end=301,
+  serialized_start=282,
+  serialized_end=349,
 )
 
 _DICSCAFFOLDLS = _descriptor.Descriptor(
@@ -188,8 +202,8 @@ _DICSCAFFOLDLS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=162,
-  serialized_end=301,
+  serialized_start=210,
+  serialized_end=349,
 )
 
 
@@ -226,8 +240,8 @@ _DICIDXSCAFFOLDS_DICSCAFFOLDENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=379,
-  serialized_end=429,
+  serialized_start=427,
+  serialized_end=477,
 )
 
 _DICIDXSCAFFOLDS = _descriptor.Descriptor(
@@ -256,8 +270,8 @@ _DICIDXSCAFFOLDS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=303,
-  serialized_end=429,
+  serialized_start=351,
+  serialized_end=477,
 )
 
 
@@ -294,8 +308,8 @@ _DICSMSCAFFOLDLS_SMILESSCAFFOLDENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=514,
-  serialized_end=584,
+  serialized_start=562,
+  serialized_end=632,
 )
 
 _DICSMSCAFFOLDLS = _descriptor.Descriptor(
@@ -324,11 +338,13 @@ _DICSMSCAFFOLDLS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=432,
-  serialized_end=584,
+  serialized_start=480,
+  serialized_end=632,
 )
 
 _TUPMOLLSATOM.fields_by_name['ls_atom'].message_type = _LSATOM
+_TUPMOLLSATOM.fields_by_name['ls_nh'].message_type = _LSATOM
+_TUPMOLLSATOM.fields_by_name['ls_np'].message_type = _LSATOM
 _LSDICMOLLSATOM.fields_by_name['dic_mol_atoms'].message_type = _TUPMOLLSATOM
 _DICSCAFFOLDLS_IDXSCAFFOLDENTRY.fields_by_name['value'].message_type = _LSDICMOLLSATOM
 _DICSCAFFOLDLS_IDXSCAFFOLDENTRY.containing_type = _DICSCAFFOLDLS

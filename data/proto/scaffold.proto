@@ -7,6 +7,8 @@ message LsAtom{
 message TupMolLsatom{
     int32 idx_mol = 1;
     LsAtom ls_atom = 2;
+    LsAtom ls_nh = 3;
+    LsAtom ls_np = 4;
 }
 
 message LsDicmollsatom{

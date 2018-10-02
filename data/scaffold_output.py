@@ -30,16 +30,21 @@ def get_sng_from_smiles(smiles):
 
     """
     mol_graph = graph.get_mol_graph(smiles)
-    ls_atom, ls_bond = mol_graph.graph_list_to_list()
-    ls_scaffold = mol_graph.ls_mol_from_sng_u()
-    ls_mol_atom_idx = []
-    for i in range(len(ls_scaffold)):
-        ls_atom_idx = []
-        for j in ls_atom[i]:
-            ls_atom_idx.append(j[1])
-        ls_mol_atom_idx.append((Chem.MolToSmiles(ls_scaffold[i]),
-                                ls_atom_idx))
-    return ls_mol_atom_idx
+    if any(mol_graph.sssr):
+        ls_nh = mol_graph.hydro_nitro
+        ls_np = mol_graph.ar_n_plus
+        ls_atom, ls_bond = mol_graph.graph_list_to_list()
+        ls_scaffold = mol_graph.ls_mol_from_sng_u()
+        ls_mol_atom_idx = []
+        for i in range(len(ls_scaffold)):
+            ls_atom_idx = []
+            for j in ls_atom[i]:
+                ls_atom_idx.append(j[1])
+            ls_mol_atom_idx.append((Chem.MolToSmiles(ls_scaffold[i]),
+                                    ls_atom_idx))
+        return ls_mol_atom_idx, ls_nh, ls_np
+    else:
+        return None
 
 
 def smiles_from_line(idx=0, file=input_dir):
@@ -51,7 +56,12 @@ def sng_from_line(idx=0, file=input_dir):
 
 
 def sng_from_line_2_queue(idx, q, file=input_dir):
-    q.put((idx, sng_from_line(idx, file=file)))
+    try:
+        sng = sng_from_line(idx, file=file)
+        if sng is not None:
+            q.put((idx, sng))
+    except:
+        print(smiles_from_line(idx=idx))
 
 
 def sng_to_queue(q, processes=30, file=input_dir):
@@ -145,10 +155,12 @@ def data_from_queue(q, print_step=5000):
             break
         try:
             mol_index, sng = q.get_nowait()
-            for sm_sng, idx_atoms in sng:
+            for sm_sng, idx_atoms in sng[0]:
                 sng_pb = TupMolLsatom()
                 sng_pb.idx_mol = mol_index
                 sng_pb.ls_atom.idx_atom.extend(idx_atoms)
+                sng_pb.ls_nh.idx_atom.extend(sng[1])
+                sng_pb.ls_np.idx_atom.extend(sng[2])
                 dic_scaffold.smiles_scaffold[sm_sng].dic_mol_atoms.extend([sng_pb])
         except:
             continue

@@ -10,6 +10,7 @@ python scaffolds_output.py --np=50 --file_input=data/datasets/input.smi --scaffo
 ```python
 from data import *
 from rdkit import Chem
+from rdkit.Chem import Draw
 from rdkit.Chem.Draw import IPythonConsole
 dic = DicSmScaffoldLs()
 with open('data/datasets/scaffolds.bin','rb') as f:
@@ -21,7 +22,7 @@ print(len(dic.smiles_scaffold))
     402344
 
 
-### Get the 6th scaffold
+### Get the 1990th scaffold
 
 
 ```python
@@ -75,7 +76,7 @@ dic.smiles_scaffold[scaffold_smiles_idx(1990)]
 
 
 
-### The 487,496th molecule containing the 6th scaffold
+### The 111,921th molecule containing the 6th scaffold
 
 
 ```python
@@ -86,5 +87,24 @@ Chem.MolFromSmiles(smiles_from_line(111921))
 
 
 ![png](images/output_6_0.png)
+
+
+
+### Get the scaffold network of The 111,921th molecule
+
+
+```python
+scaffold_list = get_mol_graph(smiles_from_line(111921)).ls_mol_from_sng_u()
+```
+
+
+```python
+Draw.MolsToGridImage(scaffold_list)
+```
+
+
+
+
+![png](images/output_9_0.png)
 
 

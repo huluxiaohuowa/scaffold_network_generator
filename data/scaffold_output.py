@@ -164,7 +164,7 @@ def data_from_queue(q, print_step=5000):
                 dic_scaffold.smiles_scaffold[sm_sng].dic_mol_atoms.extend([sng_pb])
         except:
             continue
-
+    return dic_scaffold
     #
     # for i in range(get_num_lines(file)):
     #     if i % print_step == 0:
@@ -175,7 +175,7 @@ def data_from_queue(q, print_step=5000):
     #         sng_pb.idx_mol = mol_index
     #         sng_pb.ls_atom.idx_atom.extend(idx_atoms)
     #         dic_scaffold.smiles_scaffold[sm_sng].dic_mol_atoms.extend([sng_pb])
-    return dic_scaffold
+
 
 # def protobuf_from_queue(q):
 #     """

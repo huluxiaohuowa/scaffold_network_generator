@@ -1,3 +1,5 @@
+from collections import Counter
+
 from rdkit import Chem
 import networkx as nx
 from rdkit.Chem import rdmolops
@@ -159,19 +161,45 @@ class MolGraph(object):
 
     # remove side chains
     def get_murko_graph(self, graph=None):
+        """
+        remove all side chains
+        :param : nx.Graph
+        :return : nx.Graph
+
+        """
         if graph is None:
             graph = self.graph
         murko = deepcopy(graph)
-        chains = deepcopy(graph)
-        for sssr in self.sssr_list:
-            chains.remove_nodes_from(sssr)
-        ls_chains = list(nx.connected_component_subgraphs(chains))
-        for chain in ls_chains:
-            A = deepcopy(murko)
-            A.remove_nodes_from(chain)
-            if nx.is_connected(A):
-                murko.remove_nodes_from(chain)
+        if nx.is_connected(murko):
+            while True:
+                i = 0
+                nodes = []
+                for edge in list(murko.edges):
+                    for item in edge:
+                        nodes.append(item)
+                counter = Counter(nodes)
+                for node in counter:
+                    if counter[node] == 1:
+                        i += 1
+                        murko.remove_node(node)
+                if i == 0:
+                    break
+        else:
+            raise ValueError
         return murko
+        # if graph is None:
+        #     graph = self.graph
+        # murko = deepcopy(graph)
+        # chains = deepcopy(graph)
+        # for sssr in self.sssr_list:
+        #     chains.remove_nodes_from(sssr)
+        # ls_chains = list(nx.connected_component_subgraphs(chains))
+        # for chain in ls_chains:
+        #     A = deepcopy(murko)
+        #     A.remove_nodes_from(chain)
+        #     if nx.is_connected(A):
+        #         murko.remove_nodes_from(chain)
+        # return murko
 
 
 

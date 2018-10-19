@@ -33,7 +33,10 @@ def get_sng_from_smiles(smiles):
     if any(mol_graph.sssr):
         ls_nh = mol_graph.hydro_nitro
         ls_np = mol_graph.ar_n_plus
-        ls_atom, ls_bond = mol_graph.graph_list_to_list()
+        if mol_graph.graph_list_to_list() is not None:
+            ls_atom, ls_bond = mol_graph.graph_list_to_list()
+        else:
+            return None
         ls_scaffold = mol_graph.ls_mol_from_sng_u()
         ls_mol_atom_idx = []
         for i in range(len(ls_scaffold)):
@@ -151,11 +154,13 @@ def data_from_queue(q, print_step=5000):
     dic_scaffold
         dict{scaffold smiles: (mol idx, [atom idx])}
     """
-    dic_scaffold = DicSmScaffoldLs()
+    dic_scaffold = DicIdxLs()
+    dic_sm_idx = DicSmIdx()
     file = q.get()
     print("Extracting scaffolds from" + file)
     i = 0
     num_lines = get_num_lines(file)
+    idx_sc = 0
     while True:
         i += 1
         if i % print_step == 0:
@@ -164,16 +169,25 @@ def data_from_queue(q, print_step=5000):
             break
         try:
             mol_index, sng = q.get_nowait()
+
             for sm_sng, idx_atoms in sng[0]:
                 sng_pb = TupMolLsatom()
                 sng_pb.idx_mol = mol_index
                 sng_pb.ls_atom.idx_atom.extend(idx_atoms)
                 sng_pb.ls_nh.idx_atom.extend(ls_inter(sng[1], idx_atoms))
                 sng_pb.ls_np.idx_atom.extend(ls_inter(sng[2], idx_atoms))
-                dic_scaffold.smiles_scaffold[sm_sng].dic_mol_atoms.extend([sng_pb])
+
+                if sm_sng not in dic_sm_idx.sm_sc.keys():
+                    dic_sm_idx.sm_sc[sm_sng] = idx_sc
+                    idx_sc += 1
+                dic_scaffold.smiles_scaffold[dic_sm_idx.sm_sc[sm_sng]].dic_mol_atoms.extend([sng_pb])
         except:
             continue
-    return dic_scaffold
+    dic_idx_sm = DicIdxSm()
+    for k,v in dic_sm_idx.sm_sc.items():
+        dic_idx_sm.sm_sc[v] = k
+
+    return dic_scaffold, dic_idx_sm
     #
     # for i in range(get_num_lines(file)):
     #     if i % print_step == 0:

@@ -94,39 +94,42 @@ class MolGraph(object):
         list_list_bond_idx_types = []
         if graph_list is None and any(self.sssr):
             graph_list = self.sng_unique
-            for graph in graph_list:
-                list_atom_idx_types = []
-                list_bond_idx_types = []
-                i = 0
-                for atom_idx in list(graph.nodes):
-                    symbol = self.mol.GetAtomWithIdx(atom_idx).GetSymbol()
-                    charge = self.mol.GetAtomWithIdx(atom_idx).GetFormalCharge()
-                    h_num = self.mol.GetAtomWithIdx(atom_idx).GetNumExplicitHs()
+            if graph_list is not None:
+                for graph in graph_list:
+                    list_atom_idx_types = []
+                    list_bond_idx_types = []
+                    i = 0
+                    for atom_idx in list(graph.nodes):
+                        symbol = self.mol.GetAtomWithIdx(atom_idx).GetSymbol()
+                        charge = self.mol.GetAtomWithIdx(atom_idx).GetFormalCharge()
+                        h_num = self.mol.GetAtomWithIdx(atom_idx).GetNumExplicitHs()
 
-                    if atom_idx in self.hydro_nitro and \
-                             [i for j in list(graph.edges) for i in j].count(atom_idx) < 3:
-                        h_num += 1
+                        if atom_idx in self.hydro_nitro and \
+                                 [i for j in list(graph.edges) for i in j].count(atom_idx) < 3:
+                            h_num += 1
 
-                    if atom_idx in self.ar_n_plus and \
-                             [i for j in list(graph.edges) for i in j].count(atom_idx) < 3:
-                        charge -= 1
+                        if atom_idx in self.ar_n_plus and \
+                                 [i for j in list(graph.edges) for i in j].count(atom_idx) < 3:
+                            charge -= 1
 
-                    list_atom_idx_types.append((i,
-                                                atom_idx,
-                                                symbol,
-                                                charge,
-                                                h_num
-                                                ))
+                        list_atom_idx_types.append((i,
+                                                    atom_idx,
+                                                    symbol,
+                                                    charge,
+                                                    h_num
+                                                    ))
 
-                    i += 1
-                for edge in list(graph.edges):
-                    list_bond_idx_types.append((edge[0],
-                                                edge[1],
-                                                utils.get_bond_type(self.mol.GetBondBetweenAtoms(edge[0], edge[1]))
-                                                ))
-                list_list_atom_idx_types.append(list_atom_idx_types)
-                list_list_bond_idx_types.append(list_bond_idx_types)
-            return list_list_atom_idx_types, list_list_bond_idx_types
+                        i += 1
+                    for edge in list(graph.edges):
+                        list_bond_idx_types.append((edge[0],
+                                                    edge[1],
+                                                    utils.get_bond_type(self.mol.GetBondBetweenAtoms(edge[0], edge[1]))
+                                                    ))
+                    list_list_atom_idx_types.append(list_atom_idx_types)
+                    list_list_bond_idx_types.append(list_bond_idx_types)
+                return list_list_atom_idx_types, list_list_bond_idx_types
+            else:
+                return None
         else:
             return None
 

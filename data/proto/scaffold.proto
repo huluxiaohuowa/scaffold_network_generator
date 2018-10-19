@@ -23,6 +23,10 @@ message DicSmIdx{
     map<string, int32> sm_sc = 7;
 }
 
+message DicIdxSm{
+    map<int32, string> sm_sc = 7;
+}
+
 message DicIdxLs{
     map<int32, LsDicmollsatom> smiles_scaffold = 8;
 }

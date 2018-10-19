@@ -19,10 +19,10 @@ message DicScaffoldLs{
     map<int32, LsDicmollsatom> idx_scaffold = 8;
 }
 
-message DicIdxScaffolds{
-    map<int32, string> dic_scaffold = 7;
+message DicSmIdx{
+    map<string, int32> sm_sc = 7;
 }
 
-message DicSmScaffoldLs{
-    map<string, LsDicmollsatom> smiles_scaffold = 8;
+message DicIdxLs{
+    map<int32, LsDicmollsatom> smiles_scaffold = 8;
 }

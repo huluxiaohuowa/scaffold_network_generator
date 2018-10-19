@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0escaffold.proto\"\x1a\n\x06LsAtom\x12\x10\n\x08idx_atom\x18\x01 \x03(\x05\"i\n\x0cTupMolLsatom\x12\x0f\n\x07idx_mol\x18\x01 \x01(\x05\x12\x18\n\x07ls_atom\x18\x02 \x01(\x0b\x32\x07.LsAtom\x12\x16\n\x05ls_nh\x18\x03 \x01(\x0b\x32\x07.LsAtom\x12\x16\n\x05ls_np\x18\x04 \x01(\x0b\x32\x07.LsAtom\"6\n\x0eLsDicmollsatom\x12$\n\rdic_mol_atoms\x18\x01 \x03(\x0b\x32\r.TupMolLsatom\"\x8b\x01\n\rDicScaffoldLs\x12\x35\n\x0cidx_scaffold\x18\x08 \x03(\x0b\x32\x1f.DicScaffoldLs.IdxScaffoldEntry\x1a\x43\n\x10IdxScaffoldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\x1e\n\x05value\x18\x02 \x01(\x0b\x32\x0f.LsDicmollsatom:\x02\x38\x01\"~\n\x0f\x44icIdxScaffolds\x12\x37\n\x0c\x64ic_scaffold\x18\x07 \x03(\x0b\x32!.DicIdxScaffolds.DicScaffoldEntry\x1a\x32\n\x10\x44icScaffoldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x98\x01\n\x0f\x44icSmScaffoldLs\x12=\n\x0fsmiles_scaffold\x18\x08 \x03(\x0b\x32$.DicSmScaffoldLs.SmilesScaffoldEntry\x1a\x46\n\x13SmilesScaffoldEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1e\n\x05value\x18\x02 \x01(\x0b\x32\x0f.LsDicmollsatom:\x02\x38\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x0escaffold.proto\"\x1a\n\x06LsAtom\x12\x10\n\x08idx_atom\x18\x01 \x03(\x05\"i\n\x0cTupMolLsatom\x12\x0f\n\x07idx_mol\x18\x01 \x01(\x05\x12\x18\n\x07ls_atom\x18\x02 \x01(\x0b\x32\x07.LsAtom\x12\x16\n\x05ls_nh\x18\x03 \x01(\x0b\x32\x07.LsAtom\x12\x16\n\x05ls_np\x18\x04 \x01(\x0b\x32\x07.LsAtom\"6\n\x0eLsDicmollsatom\x12$\n\rdic_mol_atoms\x18\x01 \x03(\x0b\x32\r.TupMolLsatom\"\x8b\x01\n\rDicScaffoldLs\x12\x35\n\x0cidx_scaffold\x18\x08 \x03(\x0b\x32\x1f.DicScaffoldLs.IdxScaffoldEntry\x1a\x43\n\x10IdxScaffoldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\x1e\n\x05value\x18\x02 \x01(\x0b\x32\x0f.LsDicmollsatom:\x02\x38\x01\"[\n\x08\x44icSmIdx\x12\"\n\x05sm_sc\x18\x07 \x03(\x0b\x32\x13.DicSmIdx.SmScEntry\x1a+\n\tSmScEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\"\x8a\x01\n\x08\x44icIdxLs\x12\x36\n\x0fsmiles_scaffold\x18\x08 \x03(\x0b\x32\x1d.DicIdxLs.SmilesScaffoldEntry\x1a\x46\n\x13SmilesScaffoldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\x1e\n\x05value\x18\x02 \x01(\x0b\x32\x0f.LsDicmollsatom:\x02\x38\x01\x62\x06proto3')
 )
 
 
@@ -207,24 +207,24 @@ _DICSCAFFOLDLS = _descriptor.Descriptor(
 )
 
 
-_DICIDXSCAFFOLDS_DICSCAFFOLDENTRY = _descriptor.Descriptor(
-  name='DicScaffoldEntry',
-  full_name='DicIdxScaffolds.DicScaffoldEntry',
+_DICSMIDX_SMSCENTRY = _descriptor.Descriptor(
+  name='SmScEntry',
+  full_name='DicSmIdx.SmScEntry',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='key', full_name='DicIdxScaffolds.DicScaffoldEntry.key', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
+      name='key', full_name='DicSmIdx.SmScEntry.key', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='value', full_name='DicIdxScaffolds.DicScaffoldEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      name='value', full_name='DicSmIdx.SmScEntry.value', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -240,19 +240,19 @@ _DICIDXSCAFFOLDS_DICSCAFFOLDENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=427,
-  serialized_end=477,
+  serialized_start=399,
+  serialized_end=442,
 )
 
-_DICIDXSCAFFOLDS = _descriptor.Descriptor(
-  name='DicIdxScaffolds',
-  full_name='DicIdxScaffolds',
+_DICSMIDX = _descriptor.Descriptor(
+  name='DicSmIdx',
+  full_name='DicSmIdx',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='dic_scaffold', full_name='DicIdxScaffolds.dic_scaffold', index=0,
+      name='sm_sc', full_name='DicSmIdx.sm_sc', index=0,
       number=7, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -261,7 +261,7 @@ _DICIDXSCAFFOLDS = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_DICIDXSCAFFOLDS_DICSCAFFOLDENTRY, ],
+  nested_types=[_DICSMIDX_SMSCENTRY, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -271,26 +271,26 @@ _DICIDXSCAFFOLDS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=351,
-  serialized_end=477,
+  serialized_end=442,
 )
 
 
-_DICSMSCAFFOLDLS_SMILESSCAFFOLDENTRY = _descriptor.Descriptor(
+_DICIDXLS_SMILESSCAFFOLDENTRY = _descriptor.Descriptor(
   name='SmilesScaffoldEntry',
-  full_name='DicSmScaffoldLs.SmilesScaffoldEntry',
+  full_name='DicIdxLs.SmilesScaffoldEntry',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='key', full_name='DicSmScaffoldLs.SmilesScaffoldEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      name='key', full_name='DicIdxLs.SmilesScaffoldEntry.key', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='value', full_name='DicSmScaffoldLs.SmilesScaffoldEntry.value', index=1,
+      name='value', full_name='DicIdxLs.SmilesScaffoldEntry.value', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -308,19 +308,19 @@ _DICSMSCAFFOLDLS_SMILESSCAFFOLDENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=562,
-  serialized_end=632,
+  serialized_start=513,
+  serialized_end=583,
 )
 
-_DICSMSCAFFOLDLS = _descriptor.Descriptor(
-  name='DicSmScaffoldLs',
-  full_name='DicSmScaffoldLs',
+_DICIDXLS = _descriptor.Descriptor(
+  name='DicIdxLs',
+  full_name='DicIdxLs',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='smiles_scaffold', full_name='DicSmScaffoldLs.smiles_scaffold', index=0,
+      name='smiles_scaffold', full_name='DicIdxLs.smiles_scaffold', index=0,
       number=8, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -329,7 +329,7 @@ _DICSMSCAFFOLDLS = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_DICSMSCAFFOLDLS_SMILESSCAFFOLDENTRY, ],
+  nested_types=[_DICIDXLS_SMILESSCAFFOLDENTRY, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -338,8 +338,8 @@ _DICSMSCAFFOLDLS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=480,
-  serialized_end=632,
+  serialized_start=445,
+  serialized_end=583,
 )
 
 _TUPMOLLSATOM.fields_by_name['ls_atom'].message_type = _LSATOM
@@ -349,17 +349,17 @@ _LSDICMOLLSATOM.fields_by_name['dic_mol_atoms'].message_type = _TUPMOLLSATOM
 _DICSCAFFOLDLS_IDXSCAFFOLDENTRY.fields_by_name['value'].message_type = _LSDICMOLLSATOM
 _DICSCAFFOLDLS_IDXSCAFFOLDENTRY.containing_type = _DICSCAFFOLDLS
 _DICSCAFFOLDLS.fields_by_name['idx_scaffold'].message_type = _DICSCAFFOLDLS_IDXSCAFFOLDENTRY
-_DICIDXSCAFFOLDS_DICSCAFFOLDENTRY.containing_type = _DICIDXSCAFFOLDS
-_DICIDXSCAFFOLDS.fields_by_name['dic_scaffold'].message_type = _DICIDXSCAFFOLDS_DICSCAFFOLDENTRY
-_DICSMSCAFFOLDLS_SMILESSCAFFOLDENTRY.fields_by_name['value'].message_type = _LSDICMOLLSATOM
-_DICSMSCAFFOLDLS_SMILESSCAFFOLDENTRY.containing_type = _DICSMSCAFFOLDLS
-_DICSMSCAFFOLDLS.fields_by_name['smiles_scaffold'].message_type = _DICSMSCAFFOLDLS_SMILESSCAFFOLDENTRY
+_DICSMIDX_SMSCENTRY.containing_type = _DICSMIDX
+_DICSMIDX.fields_by_name['sm_sc'].message_type = _DICSMIDX_SMSCENTRY
+_DICIDXLS_SMILESSCAFFOLDENTRY.fields_by_name['value'].message_type = _LSDICMOLLSATOM
+_DICIDXLS_SMILESSCAFFOLDENTRY.containing_type = _DICIDXLS
+_DICIDXLS.fields_by_name['smiles_scaffold'].message_type = _DICIDXLS_SMILESSCAFFOLDENTRY
 DESCRIPTOR.message_types_by_name['LsAtom'] = _LSATOM
 DESCRIPTOR.message_types_by_name['TupMolLsatom'] = _TUPMOLLSATOM
 DESCRIPTOR.message_types_by_name['LsDicmollsatom'] = _LSDICMOLLSATOM
 DESCRIPTOR.message_types_by_name['DicScaffoldLs'] = _DICSCAFFOLDLS
-DESCRIPTOR.message_types_by_name['DicIdxScaffolds'] = _DICIDXSCAFFOLDS
-DESCRIPTOR.message_types_by_name['DicSmScaffoldLs'] = _DICSMSCAFFOLDLS
+DESCRIPTOR.message_types_by_name['DicSmIdx'] = _DICSMIDX
+DESCRIPTOR.message_types_by_name['DicIdxLs'] = _DICIDXLS
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 LsAtom = _reflection.GeneratedProtocolMessageType('LsAtom', (_message.Message,), dict(
@@ -398,38 +398,38 @@ DicScaffoldLs = _reflection.GeneratedProtocolMessageType('DicScaffoldLs', (_mess
 _sym_db.RegisterMessage(DicScaffoldLs)
 _sym_db.RegisterMessage(DicScaffoldLs.IdxScaffoldEntry)
 
-DicIdxScaffolds = _reflection.GeneratedProtocolMessageType('DicIdxScaffolds', (_message.Message,), dict(
+DicSmIdx = _reflection.GeneratedProtocolMessageType('DicSmIdx', (_message.Message,), dict(
 
-  DicScaffoldEntry = _reflection.GeneratedProtocolMessageType('DicScaffoldEntry', (_message.Message,), dict(
-    DESCRIPTOR = _DICIDXSCAFFOLDS_DICSCAFFOLDENTRY,
+  SmScEntry = _reflection.GeneratedProtocolMessageType('SmScEntry', (_message.Message,), dict(
+    DESCRIPTOR = _DICSMIDX_SMSCENTRY,
     __module__ = 'scaffold_pb2'
-    # @@protoc_insertion_point(class_scope:DicIdxScaffolds.DicScaffoldEntry)
+    # @@protoc_insertion_point(class_scope:DicSmIdx.SmScEntry)
     ))
   ,
-  DESCRIPTOR = _DICIDXSCAFFOLDS,
+  DESCRIPTOR = _DICSMIDX,
   __module__ = 'scaffold_pb2'
-  # @@protoc_insertion_point(class_scope:DicIdxScaffolds)
+  # @@protoc_insertion_point(class_scope:DicSmIdx)
   ))
-_sym_db.RegisterMessage(DicIdxScaffolds)
-_sym_db.RegisterMessage(DicIdxScaffolds.DicScaffoldEntry)
+_sym_db.RegisterMessage(DicSmIdx)
+_sym_db.RegisterMessage(DicSmIdx.SmScEntry)
 
-DicSmScaffoldLs = _reflection.GeneratedProtocolMessageType('DicSmScaffoldLs', (_message.Message,), dict(
+DicIdxLs = _reflection.GeneratedProtocolMessageType('DicIdxLs', (_message.Message,), dict(
 
   SmilesScaffoldEntry = _reflection.GeneratedProtocolMessageType('SmilesScaffoldEntry', (_message.Message,), dict(
-    DESCRIPTOR = _DICSMSCAFFOLDLS_SMILESSCAFFOLDENTRY,
+    DESCRIPTOR = _DICIDXLS_SMILESSCAFFOLDENTRY,
     __module__ = 'scaffold_pb2'
-    # @@protoc_insertion_point(class_scope:DicSmScaffoldLs.SmilesScaffoldEntry)
+    # @@protoc_insertion_point(class_scope:DicIdxLs.SmilesScaffoldEntry)
     ))
   ,
-  DESCRIPTOR = _DICSMSCAFFOLDLS,
+  DESCRIPTOR = _DICIDXLS,
   __module__ = 'scaffold_pb2'
-  # @@protoc_insertion_point(class_scope:DicSmScaffoldLs)
+  # @@protoc_insertion_point(class_scope:DicIdxLs)
   ))
-_sym_db.RegisterMessage(DicSmScaffoldLs)
-_sym_db.RegisterMessage(DicSmScaffoldLs.SmilesScaffoldEntry)
+_sym_db.RegisterMessage(DicIdxLs)
+_sym_db.RegisterMessage(DicIdxLs.SmilesScaffoldEntry)
 
 
 _DICSCAFFOLDLS_IDXSCAFFOLDENTRY._options = None
-_DICIDXSCAFFOLDS_DICSCAFFOLDENTRY._options = None
-_DICSMSCAFFOLDLS_SMILESSCAFFOLDENTRY._options = None
+_DICSMIDX_SMSCENTRY._options = None
+_DICIDXLS_SMILESSCAFFOLDENTRY._options = None
 # @@protoc_insertion_point(module_scope)

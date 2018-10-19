@@ -92,6 +92,15 @@ def sng_to_queue(q, processes=30, file=input_dir):
 def scaffold_smiles_idx(idx, file=path.join(path.dirname(__file__),
                                             'datasets',
                                             'scaffolds.smi')):
+    """
+
+    Args:
+        idx (int):
+        file (str):
+
+    Returns:
+
+    """
 
     return smiles_from_line(idx, file=file)
 

@@ -355,7 +355,12 @@ class MolGraph(object):
                     if i in sng_u[j].nodes:
                         sng_u[j].add_node(so[i])
                         sng_u[j].add_edge(i, so[i])
-            return sng_u
+            if utils.graph_eq(sng_u[0], self.graph):
+                sng_u.pop(0)
+            if len(sng_u) > 0:
+                return sng_u
+            else:
+                return None
         else:
             return None
 

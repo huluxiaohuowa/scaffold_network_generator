@@ -1,6 +1,6 @@
 from rdkit import Chem
 
-from data.utils import get_num_lines
+from data.utils import get_num_lines, ls_inter
 from . import graph
 from .proto import *
 import linecache
@@ -168,8 +168,8 @@ def data_from_queue(q, print_step=5000):
                 sng_pb = TupMolLsatom()
                 sng_pb.idx_mol = mol_index
                 sng_pb.ls_atom.idx_atom.extend(idx_atoms)
-                sng_pb.ls_nh.idx_atom.extend(sng[1])
-                sng_pb.ls_np.idx_atom.extend(sng[2])
+                sng_pb.ls_nh.idx_atom.extend(ls_inter(sng[1], idx_atoms))
+                sng_pb.ls_np.idx_atom.extend(ls_inter(sng[2], idx_atoms))
                 dic_scaffold.smiles_scaffold[sm_sng].dic_mol_atoms.extend([sng_pb])
         except:
             continue

@@ -577,3 +577,15 @@ def id_mol(mol):
     for idx in range(atoms):
         mol.GetAtomWithIdx(idx).SetProp('molAtomMapNumber', str(mol.GetAtomWithIdx(idx).GetIdx()))
     return mol
+
+def ls_inter(ls1, ls2):
+    """
+
+    Args:
+        ls1 (list):
+        ls2 (list):
+
+    Returns:
+        ls (list):
+    """
+    return list(set(ls1).intersection(set(ls2)))

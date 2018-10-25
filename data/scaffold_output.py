@@ -31,8 +31,8 @@ def get_sng_from_smiles(smiles):
     """
     mol_graph = graph.get_mol_graph(smiles)
     if any(mol_graph.sssr):
-        ls_nh = mol_graph.hydro_nitro
-        ls_np = mol_graph.ar_n_plus
+        # ls_nh = mol_graph.hydro_nitro
+        # ls_np = mol_graph.ar_n_plus
         if mol_graph.graph_list_to_list() is not None:
             ls_atom, ls_bond = mol_graph.graph_list_to_list()
         else:
@@ -43,9 +43,23 @@ def get_sng_from_smiles(smiles):
             ls_atom_idx = []
             for j in ls_atom[i]:
                 ls_atom_idx.append(j[1])
+            ls_nh = ls_inter(mol_graph.hydro_nitro, ls_atom_idx)
+            ls_np = ls_inter(mol_graph.ar_n_plus, ls_atom_idx)
+
+            cp_a = [[a[0], a[1]] for a in ls_bond[i]]
+            ls_ba = [aa for aaa in cp_a for aa in aaa]
+            for a_nh in ls_nh:
+                if ls_ba.count(a_nh) >= 3:
+                    ls_nh.remove(a_nh)
+            for a_np in ls_np:
+                if ls_ba.count(a_np) >= 3:
+                    ls_np.remove(a_np)
+
             ls_mol_atom_idx.append((Chem.MolToSmiles(ls_scaffold[i]),
-                                    ls_atom_idx))
-        return ls_mol_atom_idx, ls_nh, ls_np
+                                    ls_atom_idx,
+                                    ls_nh,
+                                    ls_np))
+        return ls_mol_atom_idx
     else:
         return None
 
@@ -170,17 +184,26 @@ def data_from_queue(q, print_step=5000):
         try:
             mol_index, sng = q.get_nowait()
 
-            for sm_sng, idx_atoms in sng[0]:
+            for sng_i in sng:
                 sng_pb = TupMolLsatom()
                 sng_pb.idx_mol = mol_index
-                sng_pb.ls_atom.idx_atom.extend(idx_atoms)
-                sng_pb.ls_nh.idx_atom.extend(ls_inter(sng[1], idx_atoms))
-                sng_pb.ls_np.idx_atom.extend(ls_inter(sng[2], idx_atoms))
+                sng_pb.ls_atom.idx_atom.extend(sng_i[1])
+                sng_pb.ls_nh.idx_atom.extend(sng_i[2])
+                sng_pb.ls_np.idx_atom.extend(sng_i[3])
 
-                if sm_sng not in dic_sm_idx.sm_sc.keys():
-                    dic_sm_idx.sm_sc[sm_sng] = idx_sc
+                if sng_i[0] not in dic_sm_idx.sm_sc.keys():
+                    dic_sm_idx.sm_sc[sng_i[0]] = idx_sc
                     idx_sc += 1
-                dic_scaffold.smiles_scaffold[dic_sm_idx.sm_sc[sm_sng]].dic_mol_atoms.extend([sng_pb])
+            # for sm_sng, idx_atoms in sng[0]:
+            #     sng_pb = TupMolLsatom()
+            #     sng_pb.idx_mol = mol_index
+            #     sng_pb.ls_atom.idx_atom.extend(idx_atoms)
+            #     sng_pb.ls_nh.idx_atom.extend(ls_inter(sng[1], idx_atoms))
+            #     sng_pb.ls_np.idx_atom.extend(ls_inter(sng[2], idx_atoms))
+            #     if sm_sng not in dic_sm_idx.sm_sc.keys():
+            #         dic_sm_idx.sm_sc[sm_sng] = idx_sc
+            #         idx_sc += 1
+                dic_scaffold.smiles_scaffold[dic_sm_idx.sm_sc[sng_i[0]]].dic_mol_atoms.extend([sng_pb])
         except:
             continue
     dic_idx_sm = DicIdxSm()

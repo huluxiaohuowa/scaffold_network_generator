@@ -44,21 +44,23 @@ def get_sng_from_smiles(smiles):
             for j in ls_atom[i]:
                 ls_atom_idx.append(j[1])
             ls_nh = ls_inter(mol_graph.hydro_nitro, ls_atom_idx)
+            ls_nh_cp = []
             ls_np = ls_inter(mol_graph.ar_n_plus, ls_atom_idx)
+            ls_np_cp = []
 
             cp_a = [[a[0], a[1]] for a in ls_bond[i]]
             ls_ba = [aa for aaa in cp_a for aa in aaa]
             for a_nh in ls_nh:
-                if ls_ba.count(a_nh) >= 3:
-                    ls_nh.remove(a_nh)
+                if ls_ba.count(a_nh) < 3:
+                    ls_nh_cp.append(a_nh)
             for a_np in ls_np:
-                if ls_ba.count(a_np) >= 3:
-                    ls_np.remove(a_np)
+                if ls_ba.count(a_np) < 3:
+                    ls_np_cp.append(a_np)
 
             ls_mol_atom_idx.append((Chem.MolToSmiles(ls_scaffold[i]),
                                     ls_atom_idx,
-                                    ls_nh,
-                                    ls_np))
+                                    ls_nh_cp,
+                                    ls_np_cp))
         return ls_mol_atom_idx
     else:
         return None

@@ -127,7 +127,15 @@ class MolGraph(object):
                                                     ))
                     list_list_atom_idx_types.append(list_atom_idx_types)
                     list_list_bond_idx_types.append(list_bond_idx_types)
-                return list_list_atom_idx_types, list_list_bond_idx_types
+
+                if len(list_list_atom_idx_types[0]) == self.mol.GetNumAtoms():
+                    list_list_atom_idx_types.pop(0)
+                    list_list_bond_idx_types.pop(0)
+
+                if len(list_list_atom_idx_types) > 0:
+                    return list_list_atom_idx_types, list_list_bond_idx_types
+                else:
+                    return None
             else:
                 return None
         else:

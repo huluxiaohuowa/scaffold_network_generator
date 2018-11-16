@@ -531,7 +531,7 @@ def next_sssr(sssr, d_ring):
 
 
 def graph_eq(graph1, graph2):
-    if sorted(tuple(graph1.nodes)) == sorted(tuple(graph2.nodes)) and sorted(tuple(graph1.edges)) == sorted(tuple(graph2.edges)):
+    if graph1.nodes == graph2.nodes:
         return True
     else:
         return False

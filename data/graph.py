@@ -353,6 +353,7 @@ class MolGraph(object):
             co = self.c2o
             so = self.s1o
             no = self.n2o
+            b2 = self.b2
             for j in range(len(sng_u)):
                 for i in co:
                     if i in sng_u[j].nodes:
@@ -366,6 +367,13 @@ class MolGraph(object):
                     if i in sng_u[j].nodes:
                         sng_u[j].add_node(so[i])
                         sng_u[j].add_edge(i, so[i])
+                for i in b2:
+                    if len(utils.ls_inter(i, sng_u[j].nodes)) == 1:
+                        if i[0] in sng_u[j].nodes:
+                            sng_u[j].add_node(i[1])
+                        else:
+                            sng_u[j].add_node(i[0])
+                        sng_u[j].add_edge(i[0], i[1])
             if utils.graph_eq(sng_u[0], self.graph):
                 sng_u.pop(0)
             if len(sng_u) > 0:
@@ -420,6 +428,14 @@ class MolGraph(object):
             else:
                 dic[bond[1]] = bond[0]
         return dic
+
+    @property
+    def b2(self):
+        b2 = [[bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()]
+              for bond in self.mol.GetBonds() if utils.get_bond_type(bond) == 2]
+        # atoms_b2 = [list(set([atom for atom_pair in b2 for atom in atom_pair]))]
+        return b2
+
 
     @property
     def n2o(self):

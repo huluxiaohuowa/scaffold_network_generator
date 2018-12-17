@@ -6,11 +6,12 @@ from os import path
 from collections import Iterable
 import random
 import itertools
+import math
 
 # from utils import Block
 # from enum import Enum
 
-dic_mysql = json.load(open(path.join(path.dirname(__file__),'data', 'mysql.json'), 'r'))
+dic_mysql = json.load(open(path.join(path.dirname(__file__),'datasets', 'mysql.json'), 'r'))
 
 __all__ = [
     "SQLDataset",
@@ -1009,7 +1010,8 @@ class SQLDataset(Dataset):
                          
                 """
         if k is not None:
-            sql = sql + f"ORDER BY RAND() LIMIT {k}"
+            sql = f"select * from ({sql}) as a order by rand() limit {k}"
+            # sql = sql + f"ORDER BY RAND() LIMIT {k}"
         return pd.read_sql(sql, con=self.db)
     def _getitem_scaffold_block(self, scaffold_id, k):
         scaffold_id = str(scaffold_id)
@@ -1269,7 +1271,7 @@ class SQLDataset(Dataset):
 
 class SQLSampler(Sampler):
 
-    def __init__(self, dataset, block_id, mode, batch_size, num_epoch):
+    def __init__(self, dataset, block_id, mode, batch_size):
         super().__init__()
         self.dataset = dataset
         self.mode = mode
@@ -1277,111 +1279,62 @@ class SQLSampler(Sampler):
         self.num_mol = self.dataset.num_mol
         self.num_scaffold = self.dataset.num_scaffold
         self.block_id = block_id
-        self.num_epoch = num_epoch
+        # self.num_epoch = num_epoch
         ex_block = list(range(self.dataset.num_fold))
         ex_block.remove(self.block_id)
         self.ex = ex_block
-        # self.mini_batch_size = mini_batch_size
+        self.ids_sc_in = self.dataset.sc_fold[self.block_id]
+        self.ids_mol_in = self.dataset.mol_fold[self.block_id]
+        self.ids_sc_ex = list(itertools.chain.from_iterable([self.dataset.sc_fold[i] for i in self.ex]))
+        self.ids_mol_ex = list(itertools.chain.from_iterable([self.dataset.mol_fold[i] for i in self.ex]))
+        random.shuffle(self.ids_sc_in)
+        random.shuffle(self.ids_sc_ex)
+        random.shuffle(self.ids_mol_in)
+        random.shuffle(self.ids_mol_in)
 
     def __iter__(self):
-        if self.mode == 0: # training
-            for epoch in range(self.num_epoch):
-                i = 0
-                while True:
-                    id_sc = random.sample(self.dataset.sc_fold[self.block_id], 1)
-                    if i == 0:
-                        sc_df = self.dataset[id_sc, : ,1]
-                        if len(sc_df) == 0:
-                            continue
-                        else:
-                            i += 1
+        if self.mode == 'training':
+            for sc_ids_batch in self.divide(self.ids_sc_ex, self.batch_size):
+                for idx, sc_id in enumerate(sc_ids_batch):
+                    if idx == 0:
+                        sc_df = self.dataset[sc_id, : , 1]
                     else:
-                        sc_df_a = self.dataset[id_sc, : ,1]
-                        if len(sc_df_a) == 0:
-                            continue
-                        else:
-                            sc_df = pd.concat([sc_df, sc_df_a])
-                            i += 1
-                    if i >= self.batch_size:
-                        break
-
-                i = 0
-                while True:
-                    id_mol = random.sample(self.dataset.mol_fold[self.block_id], 1)
-                    if i == 0:
-                        mol_df = self.dataset[:, id_mol, 1]
-                        if len(mol_df) == 0:
-                            continue
-                        else:
-                            i += 1
+                        sc_df = pd.concat([sc_df, self.dataset[sc_id, : ,1]])
+                yield sc_df
+        elif self.mode == 'test':
+            for sc_ids_batch in self.divide(self.ids_sc_in, self.batch_size):
+                for idx, sc_id in enumerate(sc_ids_batch):
+                    if idx == 0:
+                        sc_df = self.dataset[sc_id, : , 1]
                     else:
-                        mol_df_a = self.dataset[: , id_mol , 1]
-                        if len(mol_df_a) == 0:
-                            continue
-                        else:
-                            mol_df = pd.concat([mol_df, mol_df_a])
-                            i += 1
-                    if i >= self.batch_size:
-                        break
-                yield pd.concat([sc_df, mol_df])
-
-        elif self.mode == 1: # test
-            # ex_block = list(range(self.dataset.num_fold))
-            # ex_block.remove(self.block_id)
-            ids_sc_ex = list(itertools.chain.from_iterable([self.dataset.sc_fold[i] for i in self.ex]))
-            ids_mol_ex = list(itertools.chain.from_iterable([self.dataset.mol_fold[i] for i in self.ex]))
-            for epoch in range(self.num_epoch):
-                i = 0
-                while True:
-                    id_sc = random.sample(ids_sc_ex, 1)
-                    if i == 0:
-                        sc_df = self.dataset[id_sc, :, 1]
-                        if len(sc_df) == 0:
-                            continue
-                        else:
-                            i += 1
+                        sc_df = pd.concat([sc_df, self.dataset[sc_id, : ,1]])
+                yield sc_df
+        elif self.mode == 'evaluation':
+            for sc_ids_batch in self.divide(self.ids_sc_ex, self.batch_size):
+                for idx, sc_id in enumerate(sc_ids_batch):
+                    if idx == 0:
+                        sc_df = self.dataset[sc_id, : ]
                     else:
-                        sc_df_a = self.dataset[id_sc, :, 1]
-                        if len(sc_df_a) == 0:
-                            continue
-                        else:
-                            sc_df = pd.concat([sc_df, sc_df_a])
-                            i += 1
-                    if i >= self.batch_size:
-                        break
-
-                i = 0
-                while True:
-                    id_mol = random.sample(ids_mol_ex, 1)
-                    if i == 0:
-                        mol_df = self.dataset[:, id_mol, 1]
-                        if len(mol_df) == 0:
-                            continue
-                        else:
-                            i += 1
-                    else:
-                        mol_df_a = self.dataset[:, id_mol, 1]
-                        if len(mol_df_a) == 0:
-                            continue
-                        else:
-                            mol_df = pd.concat([mol_df, mol_df_a])
-                            i += 1
-                    if i >= self.batch_size:
-                        break
-                yield pd.concat([sc_df, mol_df])
-
-        elif self.mode == 2: # evaluation
-            yield 0
+                        sc_df = pd.concat([sc_df, self.dataset[sc_id, : ]])
+                yield sc_df
         else:
             raise  ValueError
 
+    @staticmethod
+    def divide(ls, each):
+        len_group = len(ls)
+        num_group = math.ceil(len_group / each)
+        return (ls[each * i:each * (i + 1)] for i in range(num_group))
 
-
-
-
-
-
-
+    @staticmethod
+    def get_group_dic(grouped_df):
+        dic = {}
+        for group in grouped_df:
+            if group[0][0] not in dic:
+                dic[group[0][0]] = [group[0][1]]
+            else:
+                dic[group[0][0]].append(group[0][1])
+        return dic
 
 
 class DFTransformer(Transformer):

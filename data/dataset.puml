@@ -1,0 +1,194 @@
+@startuml
+
+skinparam dpi 300
+skinparam monochrome true
+skinparam svgLinkTarget _parent
+'scale 3000*2000
+
+
+abstract class Object
+
+Object <|-- Dataset
+Object <|-- Sampler
+Object <|-- Transformer
+Object <|-- Block
+Object <|-- ExcludeBlock
+Object <|-- Switch
+
+
+Dataset <|-- SQLDataset
+Dataset <|-- ProtoDataset
+
+Sampler <|-- SQLSampler
+Sampler <|-- ProtoSampler
+
+Transformer <|-- DFTransformer
+
+class Object{
+Parent class of all other classes
+--field--
+(buitin)
+--method--
+(builtin)
+}
+
+class Switch{
+--filed--
+value
+fall
+--method--
+-__init__(value)
+-__iter__()
++match(*args)
+}
+
+
+class Block{
+A subclass of int
+Performs the id of a block of samples
+--filed--
+-num
+--method--
+-__init__(block_id)
+-__repr__()
+}
+
+class ExcludeBlock{
+--filed--
+-block_id
+- i
+-ls_all
+--method--
+-__init__(block_id, num_block=5)
+-__repr__()
+-__iter__()
+-__next__()
+}
+
+abstract class Dataset{
+The whole data will be exposed to it
+--filed--
+
+--method--
+#__init__()
+#__getitem__(*input)
+}
+
+class SQLDataset{
+A mysql Dataset class
+--field--
+-db
+-scaffold_table
+-mol_table
+-map_table
+--method--
+-__init__(mysql_param, scaffold_table, mol_table, map_table)
++ls_to_str(list)
+-__getitem__(scaffold_id, mol_id)
+-_get_item_block_block(scaffold_id, mol_id)
+-_get_item_block_int(scaffold_id, mol_id)
+-_get_item_block_list(scaffold_id, mol_id)
+-_get_item_list_block(scaffold_id, mol_id)
+-_get_item_list_list(scaffold_id, mol_id)
+-_get_item_list_int(scaffold_id, mol_id)
+-_get_item_int_block(scaffold_id, mol_id)
+-_get_item_int_list(scaffold_id, mol_id)
+-_get_item_int_int(scaffold_id, mol_id)
+-_getitem_exblock_exblock(saffold_id, mol_id)
+-_getitem_exblock_block(scaffold_id, mol_id)
+-_getitem_exblock_list(scaffold_id, mol_id)
+-_getitem_exblock_int(scaffold_id, mol_id)
+-_getitem_list_exblock(scaffold_id, mol_id)
+-_getitem_int_exblock(scaffold_id, mol_id)
+-_getitem_block_exblock(scaffold_id, mol_id)
+-_getitem_scaffold_int(scaffold_id)
+-_getitem_scaffold_list(scaffold_id)
+-_getitem_scaffold_block(scaffold_id)
+-_getitem_scaffold_exblock(scaffold_id)
+-_getitem_mol_int(mol_id)
+-_getitem_mol_list(mol_id)
+-_getitem_mol_block(mol_id)
+-_getitem_mol_exblock(mol_id)
+-_getitem_all()
+
+}
+
+class ProtoDataset{
+A protocol buffer Dataset class
+--filed--
+-scaffolds_proto_file
+-idx_sm_proto_file
+--method--
+-__getitem__(scaffold_id, mol_id)
+}
+
+
+abstract class Sampler{
+A generator of mini-batch
+--field--
+#dataset
+#mode
+#batch_size
+--method--
+#__init__(dataset, batch_size, mini_batch_size)
++__next__()
++sample_by_idx(scaffold_id, mol_id, batch_size)
+}
+
+class SQLSampler{
+--filed--
+-dataset
+-mode
+-batch_size
+-minibatch_size
+--method--
+-__init__(dataset, batch_size, mini_batch_size)
++__next__()
++sample_by_idx(scaffold_id, mol_id, batch_size)
+}
+
+class ProtoSampler{
+--filed--
+-dataset
+-mode
+-batch_size
+-minibatch_size
+--method--
+-__init__(dataset, minibatch_size, batch_size=0)
++__next__()
++sample_by_idx(scaffold_id, mol_id, batch_size)
+}
+
+
+
+abstract class Transformer{
+--field--
+#data
+--method--
+#mol_to_array(smiles)
+#batch_to_array(smiles_list)
+}
+
+class DFTransformer{
+--field--
+#data
+-col_sc_smiles
+-col_mol_smiles
+-col_ls_atom
+-col_ls_np
+-col_ls_nh
+--method--
+-__init__(data,
+          col_sc_smiles,
+          col_mol_smiles,
+          col_ls_atom,
+          col_ls_np,
+          col_ls_nh)
++mol_to_array(smiles)
++mol_list_to_array(smiles_list)
++str_to_ls('[]')
+}
+
+
+
+@enduml

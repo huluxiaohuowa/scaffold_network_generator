@@ -5,15 +5,27 @@ skinparam monochrome true
 skinparam svgLinkTarget _parent
 'scale 3000*2000
 
+'目前的sampler为单进程，因为stranformer是外部的，sampler的角色虽然繁琐但是计算量不大，对于当前不超过256的batch_size而言抽样的速度不会影响训练
+'正在考虑是否把transform部分直接写进
+'loader，这部分需要并行，
 
 abstract class Object
 
+'直接读取数据
 Object <|-- Dataset
+
+'对Dataset进行抽样
 Object <|-- Sampler
+
+'数据格式转换与运算
 Object <|-- Transformer
+
+'实现以block进行索引
 Object <|-- Block
+
+'以排除block进行索引
 Object <|-- ExcludeBlock
-Object <|-- Switch
+
 
 
 Dataset <|-- SQLDataset
@@ -32,15 +44,6 @@ Parent class of all other classes
 (builtin)
 }
 
-class Switch{
---filed--
-value
-fall
---method--
--__init__(value)
--__iter__()
-+match(*args)
-}
 
 
 class Block{
@@ -51,6 +54,7 @@ Performs the id of a block of samples
 --method--
 -__init__(block_id)
 -__repr__()
+'可以通过访问对象本身来访问类似int值
 }
 
 class ExcludeBlock{
@@ -61,8 +65,10 @@ class ExcludeBlock{
 --method--
 -__init__(block_id, num_block=5)
 -__repr__()
+'访问对象本身得到迭代器
 -__iter__()
 -__next__()
+'可为generator
 }
 
 abstract class Dataset{
@@ -72,6 +78,7 @@ The whole data will be exposed to it
 --method--
 #__init__()
 #__getitem__(*input)
+'定义接口，形式不固定
 }
 
 class SQLDataset{
@@ -81,10 +88,18 @@ A mysql Dataset class
 -scaffold_table
 -mol_table
 -map_table
+-num_mol
+-num_scaffold
+-num_map
+-sc_fold 'dict {block_id:[mol,mol]} 直接初始时运行好，只花一次时间
+-mol_fold 'dict {block_id:[mol, mol]}
+-num_fold=5 '预置fold数
 --method--
 -__init__(mysql_param, scaffold_table, mol_table, map_table)
-+ls_to_str(list)
--__getitem__(scaffold_id, mol_id)
++ls_to_str(list) '把传入的列表转为'(int,int...)'的字符串形式
+-__getitem__(scaffold_id, mol_id) '对应5*5=25种索引方式
+
+'对25种索引方式，以如下方法进行索引
 -_get_item_block_block(scaffold_id, mol_id)
 -_get_item_block_int(scaffold_id, mol_id)
 -_get_item_block_list(scaffold_id, mol_id)
@@ -137,12 +152,20 @@ A generator of mini-batch
 
 class SQLSampler{
 --filed--
--dataset
--mode
+-dataset '传入dataset对象
+-mode '有3种模式，training, test, evaluation，字符串识别
 -batch_size
+-num_mol '将self.dataset.num_mol传入，改了代码后好像用不到了
+-num_scaffold '将self.dataset.num_scaffold传入，改了代码后好像用不到了
+-block_id  '针对的fold，每次实例化一个新的sampler
+-ex
+-ids_sc_in
+-ids_sc_ex
+-ids_mol_in
+-idx_mol_ex
 -minibatch_size
 --method--
--__init__(dataset, batch_size, mini_batch_size)
+-__init__(dataset, block_id, mode, batch_size)
 +__next__()
 +sample_by_idx(scaffold_id, mol_id, batch_size)
 }

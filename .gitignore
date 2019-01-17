@@ -106,3 +106,7 @@ datasets
 
 # vscode
 .vscode/
+
+# datasets
+*.smi
+#.json

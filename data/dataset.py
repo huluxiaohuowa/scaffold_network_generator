@@ -7,6 +7,13 @@ from collections import Iterable
 import random
 import itertools
 import math
+from . import data_struct as mol_spec
+import numpy as np
+from rdkit import Chem
+import networkx as nx
+# from torch.utils.data import DataLoader
+# from copy import deepcopy
+
 
 # from utils import Block
 # from enum import Enum
@@ -1290,33 +1297,55 @@ class SQLSampler(Sampler):
         random.shuffle(self.ids_sc_in)
         random.shuffle(self.ids_sc_ex)
         random.shuffle(self.ids_mol_in)
-        random.shuffle(self.ids_mol_in)
+        random.shuffle(self.ids_mol_ex)
+        self.i = 0
 
     def __iter__(self):
         if self.mode == 'training':
-            for sc_ids_batch in self.divide(self.ids_sc_ex, self.batch_size):
-                for idx, sc_id in enumerate(sc_ids_batch):
-                    if idx == 0:
-                        sc_df = self.dataset[sc_id, : , 1]
-                    else:
-                        sc_df = pd.concat([sc_df, self.dataset[sc_id, : ,1]])
-                yield sc_df
+
+            sc_df = []
+            mol_df =[]
+            while True:
+                sc_id = self.ids_sc_ex[self.i % len(self.ids_sc_ex)]
+                mol_id = self.ids_mol_ex[self.i % len(self.ids_mol_ex)]
+                sc_df.append(self.dataset[sc_id, : , 1])
+                mol_df.append(self.dataset[:, mol_id, 1])
+                self.i += 1
+                if self.i % int(self.batch_size/2) == 0:
+                    sc_df = pd.concat(sc_df)
+                    mol_df = pd.concat(mol_df)
+                    batch_df = pd.concat([sc_df, mol_df])
+                    # batch_df = deepcopy(sc_df)
+                    sc_df = []
+                    mol_df = []
+                    yield batch_df #
         elif self.mode == 'test':
-            for sc_ids_batch in self.divide(self.ids_sc_in, self.batch_size):
-                for idx, sc_id in enumerate(sc_ids_batch):
-                    if idx == 0:
-                        sc_df = self.dataset[sc_id, : , 1]
-                    else:
-                        sc_df = pd.concat([sc_df, self.dataset[sc_id, : ,1]])
-                yield sc_df
+            sc_df = []
+            mol_df = []
+            while True:
+                sc_id = self.ids_sc_in[self.i % len(self.ids_sc_in)]
+                mol_id = self.ids_mol_in[self.i % len(self.ids_mol_in)]
+                sc_df.append(self.dataset[sc_id, :, 1])
+                mol_df.append(self.dataset[:, mol_id, 1])
+                self.i += 1
+                if self.i % int(self.batch_size / 2) == 0:
+                    sc_df = pd.concat(sc_df)
+                    mol_df = pd.concat(mol_df)
+                    batch_df = pd.concat([sc_df, mol_df])
+                    # batch_df = deepcopy(sc_df)
+                    sc_df = []
+                    mol_df = []
+                    yield batch_df  #
+
         elif self.mode == 'evaluation':
-            for sc_ids_batch in self.divide(self.ids_sc_ex, self.batch_size):
-                for idx, sc_id in enumerate(sc_ids_batch):
-                    if idx == 0:
-                        sc_df = self.dataset[sc_id, : ]
-                    else:
-                        sc_df = pd.concat([sc_df, self.dataset[sc_id, : ]])
-                yield sc_df
+            batch_df = []
+            # for sc_ids_batch in self.divide(self.ids_sc_ex, self.batch_size):
+            #     for idx, sc_id in enumerate(sc_ids_batch):
+            #         if idx == 0:
+            #             sc_df = self.dataset[sc_id, : ]
+            #         else:
+            #             sc_df = pd.concat([sc_df, self.dataset[sc_id, : ]])
+            yield batch_df
         else:
             raise  ValueError
 
@@ -1351,12 +1380,276 @@ class DFTransformer(Transformer):
         self.col_ls_np = col_ls_np
         self.col_ls_nh = col_ls_nh
 
-    def mol_to_array(self):
-        pass
+    @staticmethod
+    def smiles_to_mol(smiles):
+        return Chem.MolFromSmiles(smiles)
+
+    def mol_to_array(mol,
+                     scaffold_nodes,
+                     nh_nodes,
+                     np_nodes,
+                     k, p,
+                     ms=mol_spec.get_default_mol_spec()):
+        """
+        Represent the molecule using `np.ndarray`
+        Args:
+            mol (Chem.Mol): The input molecule
+            scaffold_nodes (Iterable): The location of scaffold represented as `list`/`np.ndarray`
+            nh_nodes (Iterable): Nodes with modifications
+            np_nodes (Iterable): Nodes with modifications
+                dtype - np.int32, shape - [k, num_bonds + 1, 5]
+            k (int): The number of importance samples
+            p (float): Degree of uncertainty during route sampling, should be in (0, 1)
+            ms (mol_spec.MoleculeSpec)
+        Returns:
+            mol_array (np.ndarray): The numpy representation of the molecule
+            logp (np.ndarray): The log-likelihood of each route
+                dtype - np.float32, shape - [k, ]
+        """
+        atom_types, bond_info = [], []
+        num_atoms, num_bonds = mol.GetNumAtoms(), mol.GetNumBonds()
+
+        # sample route
+        scaffold_nodes = np.array(list(scaffold_nodes), dtype=np.int32)
+        route_list, step_ids_list, logp = _sample_ordering(mol, scaffold_nodes, k, p)
+
+        for atom_id, atom in enumerate(mol.GetAtoms()):
+            if atom_id in nh_nodes:
+                atom.SetNumExplicitHs(atom.GetNumExplicitHs() + 1)
+            if atom_id in np_nodes:
+                atom.SetFormalCharge(atom.GetFormalCharge() - 1)
+            atom_types.append(ms.get_atom_type(atom))
+
+        for bond in mol.GetBonds():
+            bond_info.append([bond.GetBeginAtomIdx(), bond.GetEndAtomIdx(), ms.get_bond_type(bond)])
+
+        # shape:
+        # atom_types: num_atoms
+        # bond_info: num_bonds x 3
+        atom_types, bond_info = np.array(atom_types, dtype=np.int32), \
+                                np.array(bond_info, dtype=np.int32)
+
+        # initialize packed molecule array data
+        mol_array = []
+
+        for sample_id in range(k):
+            # get the route and step_ids for the i-th sample
+            route_i, step_ids_i = route_list[sample_id, :], step_ids_list[sample_id, :]
+
+            # reorder atom types and bond info
+            # note: bond_info [start_ids, end_ids, bond_type]
+            atom_types_i, bond_info_i, is_append = _reorder(atom_types, bond_info, route_i, step_ids_i)
+
+            # atom type added at each step
+            # -1 if the current step is connect
+            atom_types_added = np.full([num_bonds, ], -1, dtype=np.int32)
+            atom_types_added[is_append] = atom_types_i[bond_info_i[:, 1]][is_append]
+
+            # pack into mol_array_i
+            # size: num_bonds x 4
+            # note: [atom_types_added, start_ids, end_ids, bond_type]
+            mol_array_i = np.concatenate([atom_types_added[:, np.newaxis], bond_info_i], axis=-1)
+
+            # add initialization step
+            init_step = np.array([[atom_types_i[0], -1, 0, -1]], dtype=np.int32)
+
+            # concat into mol_array
+            # size: (num_bonds + 1) x 4
+            mol_array_i = np.concatenate([init_step, mol_array_i], axis=0)
+
+            # Mark up scaffold bonds
+            is_scaffold = np.logical_and(mol_array_i[:, 1] < len(scaffold_nodes),
+                                         mol_array_i[:, 2] < len(scaffold_nodes)).astype(np.int32)
+
+            # Concatenate
+            # shape: k x (num_bonds + 1) x 5
+            mol_array_i = np.concatenate((mol_array_i, is_scaffold[:, np.newaxis]), axis=-1)
+
+            mol_array.append(mol_array_i)
+
+        mol_array = np.stack(mol_array, axis=0)  # num_samples x (num_bonds + 1) x 4
+
+        # Output size:
+        # mol_array: k x (num_bonds + 1) x 4
+        # logp: k
+
+        return mol_array, logp
 
     def batch_to_array(self):
         pass
 
-    @staticmethod
-    def str_to_ls(str_ls):
-        exec("return " + str_ls)
+
+def str_to_ls(str_ls):
+    exec("return " + str_ls)
+
+def _sample_ordering(mol, scaffold_nodes, k, p, ms=mol_spec.get_default_mol_spec()):
+    """Sampling decoding routes of a given molecule `mol`
+    Args:
+        mol (Chem.Mol): the given molecule (type: Chem.Mol)
+        scaffold_nodes (np.ndarray): the nodes marked as scaffold
+        k (int): The number of importance samples
+        p (float): Degree of uncertainty during route sampling, should be in (0, 1)
+        ms (mol_spec.MoleculeSpec)
+    Returns:
+        route_list (np.ndarray):
+            route_list[i][j] - the index of the atom reached at step j in sample i
+        step_ids_list (np.ndarray):
+            step_ids_list[i][j] - the step at which atom j is reach at sample i
+        logp_list (np.ndarray):
+            logp_list[i] - the log-likelihood value of route i
+    """
+    # build graph
+    atom_types, atom_ranks, bonds = [], [], []
+    for atom in mol.GetAtoms():
+        atom_types.append(ms.get_atom_type(atom))
+    for r in Chem.CanonicalRankAtoms(mol):
+        atom_ranks.append(r)
+    for b in mol.GetBonds():
+        idx_1, idx_2 = b.GetBeginAtomIdx(), b.GetEndAtomIdx()
+        bonds.append([idx_1, idx_2])
+    atom_ranks = np.array(atom_ranks)
+
+    # build nx graph
+    graph = nx.Graph()
+    graph.add_nodes_from(range(len(atom_ranks)))
+    graph.add_edges_from(bonds)
+
+    route_list, step_ids_list, logp_list = [], [], []
+    for i in range(k):
+        step_ids, log_p = _traverse(graph, atom_ranks, scaffold_nodes, p)
+        step_ids_list.append(step_ids)
+        step_ids = np.argsort(step_ids)
+        route_list.append(step_ids)
+        logp_list.append(log_p)
+
+    # cast to numpy array
+    route_list, step_ids_list = np.array(route_list, dtype=np.int32), np.array(step_ids_list, dtype=np.int32)
+    logp_list = np.array(logp_list, dtype=np.float32)
+
+    return route_list, step_ids_list, logp_list
+
+# noinspection PyMethodMayBeStatic
+def _reorder(atom_types, bond_info, route, step_ids):
+    """ Reorder atom and bonds according the decoding route
+    Args:
+        atom_types (np.ndarray): storing the atom type of each atom, size: num_atoms
+        bond_info (np.ndarray): storing the bond information, size: num_bonds x 3
+        route (np.ndarray): route index
+        step_ids (np.ndarray): step index
+    Returns:
+        atom_types, bond_info, is_append (np.ndarray): reordered atom_types and bond_info
+    """
+
+    atom_types, bond_info = np.copy(atom_types), np.copy(bond_info)
+
+    # sort by step_ids
+    atom_types = atom_types[route]
+    bond_info[:, 0], bond_info[:, 1] = step_ids[bond_info[:, 0]], step_ids[bond_info[:, 1]]
+    max_b, min_b = np.amax(bond_info[:, :2], axis=1), np.amin(bond_info[:, :2], axis=1)
+    bond_info = bond_info[np.lexsort([-min_b, max_b]), :]
+
+    # separate append and connect
+    max_b, min_b = np.amax(bond_info[:, :2], axis=1), np.amin(bond_info[:, :2], axis=1)
+    is_append = np.concatenate([np.array([True]), max_b[1:] > max_b[:-1]])
+    bond_info = np.concatenate([np.where(is_append[:, np.newaxis],
+                                         np.stack([min_b, max_b], axis=1),
+                                         np.stack([max_b, min_b], axis=1)),
+                                bond_info[:, -1:]], axis=1)
+
+    return atom_types, bond_info, is_append
+
+def _traverse(graph, atom_ranks, scaffold_nodes, p):
+    """ An recursive function for stochastic traversal of the entire `graph`
+    Args:
+        graph (nx.Graph): The graph to be traversed
+        atom_ranks (np.ndarray): A list storing the rank of each atom
+        scaffold_nodes (np.ndarray): A list storing the index of atoms in the scaffold
+        p (float): Degree of uncertainty during route sampling, should be in (0, 1)
+    Returns:
+        step_ids (np.ndarray): `step_ids` for the next traversal step
+        log_p (np.ndarray): `log_p` for the next traversal step
+    """
+    step_ids = _traverse_scaffold(graph, atom_ranks, scaffold_nodes, p)
+    if len(scaffold_nodes) < len(atom_ranks):
+        step_ids, log_p = _traverse_chain(graph, atom_ranks, scaffold_nodes, step_ids, p)
+    else:
+        log_p = 0.0
+
+    return step_ids, log_p
+
+def _traverse_scaffold(graph, atom_ranks, scaffold_nodes, p,
+                       current_node=None, step_ids=None):
+    """ An recursive function for stochastic traversal of scaffold in `graph`"""
+    # Initialize next_nodes and step_ids (if is None)
+    if current_node is None:
+        next_nodes = scaffold_nodes  # Initialize as the set of all scaffold nodes
+        step_ids = np.full_like(atom_ranks, -1)  # Initialize step_ids as -1
+    else:
+        next_nodes = np.array(list(graph.neighbors(current_node)), dtype=np.int32)  # get neighbor nodes
+        next_nodes = np.intersect1d(next_nodes, scaffold_nodes, assume_unique=True)  # Only scaffold nodes
+
+    next_nodes = next_nodes[np.argsort(atom_ranks[next_nodes])]  # Sort by atom_ranks
+    next_nodes = next_nodes[step_ids[next_nodes] == -1]  # Filter visited nodes
+
+    # Iterate through neighbors
+    while len(next_nodes) > 0:  # If there are unvisited neighbors
+        if len(next_nodes) == 1:  # Only one neighbor is unvisited
+            next_node = next_nodes[0]  # Visit this neighbor
+        else:
+            alpha = (p * np.array([1.0, ] + [0.0, ] * (len(next_nodes) - 1), dtype=np.float32) +
+                 (1.0 - p) * np.array([1.0/len(next_nodes), ] * len(next_nodes), dtype=np.float32))
+            next_node = np.random.choice(next_nodes, p=alpha)
+
+        step_ids[next_node] = max(step_ids) + 1
+
+        # Proceed to the next step
+        step_ids = _traverse_scaffold(graph, atom_ranks, scaffold_nodes, p, next_node, step_ids)
+        next_nodes = next_nodes[step_ids[next_nodes] == -1]  # Filter visited nodes
+
+    return step_ids
+
+def _traverse_chain(graph, atom_ranks, scaffold_nodes, step_ids, p,
+                    current_node=None, log_p=0.0):
+    """ An recursive function for stochastic traversal of side chains in `graph`
+    Notes:
+        The scaffold should be first traversed using `_traverse_scaffold`
+    """
+    # Initialize next_nodes
+    if current_node is None:  # For the fist step
+        next_nodes = set([])  # Initialize next_nodes as an empty set
+        for scaffold_node_id in scaffold_nodes:  # Iterate through scaffold nodes
+            # Add all nodes directly connected to scaffold nodes
+            next_nodes = next_nodes.union(set(graph.neighbors(scaffold_node_id)))
+        next_nodes = np.array(list(next_nodes), dtype=np.int32)  # Convert to ndarray
+        next_nodes = np.setdiff1d(next_nodes, scaffold_nodes, assume_unique=True)  # Remove all scaffold nodes
+    else:
+        next_nodes = np.array(list(graph.neighbors(current_node)), dtype=np.int32)  # Get neighbor nodes
+        next_nodes = np.setdiff1d(next_nodes, scaffold_nodes, assume_unique=True)  # Remove all scaffold nodes
+
+    next_nodes = next_nodes[np.argsort(atom_ranks[next_nodes])]  # Sort by atom_ranks
+    next_nodes = next_nodes[step_ids[next_nodes] == -1]  # Filter visited nodes
+
+    # Iterate through neighbors
+    while len(next_nodes) > 0:  # If there are unvisited neighbors
+        if len(next_nodes) == 1:  # Only one neighbor is unvisited
+            next_node = next_nodes[0]  # Visit this neighbor
+            log_p_step = 0.0
+        else:
+            alpha = (p * np.array([1.0, ] + [0.0, ] * (len(next_nodes) - 1), dtype=np.float32) +
+                 (1.0 - p) * np.array([1.0 / len(next_nodes), ] * len(next_nodes), dtype=np.float32))
+            next_node_index = np.random.choice(np.arange(len(next_nodes)), p=alpha)
+            next_node = next_nodes[next_node_index]
+            log_p_step = np.log(alpha[next_node_index])
+
+        # # If scaffold have been iterated
+        # if not is_scaffold_iteration:
+        #     log_p += log_p_step
+
+        log_p += log_p_step
+        step_ids[next_node] = max(step_ids) + 1
+
+        # Proceed to the next step
+        step_ids, log_p = _traverse_chain(graph, atom_ranks, scaffold_nodes, step_ids, p, next_node, log_p)
+        next_nodes = next_nodes[step_ids[next_nodes] == -1]  # Filter visited nodes
+
+    return step_ids, log_p

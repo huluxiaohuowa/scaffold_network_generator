@@ -12,6 +12,7 @@ from data import *
 from rdkit import Chem
 from rdkit.Chem import Draw
 from rdkit.Chem.Draw import IPythonConsole
+
 dic = DicSmScaffoldLs()
 with open('data/datasets/scaffolds.bin','rb') as f:
     dic.ParseFromString(f.read())

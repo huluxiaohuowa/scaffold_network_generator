@@ -1,5 +1,8 @@
 
+
 # Scaffold Network Generator
+## Contributers
+[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/0)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/0)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/1)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/1)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/2)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/2)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/3)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/3)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/4)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/4)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/5)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/5)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/6)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/6)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/7)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/7)
 ## Usage
 ```bash
 python scaffolds_output.py --np=50 --file_input=data/datasets/input.smi --scaffolds_output=data/datasets/scaffolds.smi --file_output=data/datasets/scaffolds.bin 

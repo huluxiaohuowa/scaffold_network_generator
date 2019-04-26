@@ -3,8 +3,9 @@
 # Scaffold Network Generator
 
 
-[![LICENSE](https://img.shields.io/badge/license-NPL%20(The%20996%20Prohibited%20License)-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
-<a href="https://996.icu"><img src="https://img.shields.io/badge/link-996.icu-red.svg" alt="996.icu"></a>
+[![Badge](https://img.shields.io/badge/link-996.icu-%23FF4D5B.svg?style=flat-square)](https://996.icu/#/en_US)
+[![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg?style=flat-square)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
+[![Slack](https://img.shields.io/badge/slack-996icu-green.svg?style=flat-square)](https://join.slack.com/t/996icu/shared_invite/enQtNTg4MjA3MzA1MzgxLWQyYzM5M2IyZmIyMTVjMzU5NTE5MGI5Y2Y2YjgwMmJiMWMxMWMzNGU3NDJmOTdhNmRlYjJlNjk5ZWZhNWIwZGM)
 
 ## Contributers
 [![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/0)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/0)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/1)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/1)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/2)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/2)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/3)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/3)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/4)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/4)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/5)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/5)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/6)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/6)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/7)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/7)

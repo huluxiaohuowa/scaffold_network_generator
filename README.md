@@ -1,7 +1,14 @@
 
 # Scaffold Network Generator
+## Repo
+
+[Github](https://github.com/jach4/scaffold_network_generator)
+
 ## Usage
+
 ```bash
+git clone git@github.com:jach4/scaffold_network_generator.git sng
+cd sng
 python scaffolds_output.py --np=50 --file_input=data/datasets/input.smi --scaffolds_output=data/datasets/scaffolds.smi --file_output=data/datasets/scaffolds.bin 
 ```
 ## Read the entire scaffold message from a file
@@ -33,13 +40,7 @@ Chem.MolFromSmiles(scaffold_smiles_idx(1990))
 
     c1n[nH]nc1-c1nnc(-c2cnns2)o1
 
-
-
-
-
-![png](images/output_3_1.png)
-
-
+{% assert_imag Scaffold-network-generator/output_3_1.png %}
 
 
 ```python
@@ -84,12 +85,7 @@ dic.smiles_scaffold[scaffold_smiles_idx(1990)]
 Chem.MolFromSmiles(smiles_from_line(111921))
 ```
 
-
-
-
-![png](images/output_6_0.png)
-
-
+{% assert_imag Scaffold-network-generator/output_6_0.png %}
 
 ### Get the scaffold network of The 111,921th molecule
 
@@ -103,9 +99,9 @@ scaffold_list = get_mol_graph(smiles_from_line(111921)).ls_mol_from_sng_u()
 Draw.MolsToGridImage(scaffold_list)
 ```
 
+{% assert_imag Scaffold-network-generator/output_9_0.png %}
 
 
 
-![png](images/output_9_0.png)
 
 

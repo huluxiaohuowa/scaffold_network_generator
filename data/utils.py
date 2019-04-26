@@ -7,11 +7,20 @@ import networkx as nx
 import multiprocessing as mp
 import os
 from copy import deepcopy
-from . import data_struct
+from data import data_struct
 from os import path
-from . import data_struct as mol_spec
+from data import data_struct as mol_spec
 
-ATOM_SYMBOLS = ['C', 'F', 'I', 'Cl', 'N', 'O', 'P', 'Br', 'S']
+ATOM_SYMBOLS = []
+with open(path.join(
+    path.dirname(__file__),
+    'datasets',
+    'atom_types.txt')
+) as f:
+    for line in f.readlines():
+        line = line.strip().split(',')
+        ATOM_SYMBOLS.append(line[0])
+
 BOND_ORDERS = [Chem.BondType.AROMATIC,
                Chem.BondType.SINGLE,
                Chem.BondType.DOUBLE,

@@ -480,4 +480,3 @@ class MolGraph(object):
 
 def get_mol_graph(smiles):
     return MolGraph(smiles)
-

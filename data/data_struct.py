@@ -71,7 +71,8 @@ class MoleculeSpec(object):
                             Chem.BondType.SINGLE,
                             Chem.BondType.DOUBLE,
                             Chem.BondType.TRIPLE]
-
+        self.input_file = input_file
+        self.atom_types_file = file_name                   
         self.max_num_atoms = max_num_atoms
         self.max_num_bonds = max_num_bonds
 

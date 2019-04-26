@@ -11,163 +11,161 @@ from data import data_struct
 from os import path
 from data import data_struct as mol_spec
 
-ATOM_SYMBOLS = []
-with open(path.join(
-    path.dirname(__file__),
-    'datasets',
-    'atom_types.txt')
-) as f:
-    for line in f.readlines():
-        line = line.strip().split(',')
-        ATOM_SYMBOLS.append(line[0])
+ms = mol_spec.get_default_mol_spec()
+ATOM_SYMBOLS = ms.atom_symbols
+# []
+# with open(path.join(
+#     path.dirname(__file__),
+#     'datasets',
+#     'atom_types.txt')
+# ) as f:
+#     for line in f.readlines():
+#         line = line.strip().split(',')
+#         ATOM_SYMBOLS.append(line[0])
 
-BOND_ORDERS = [Chem.BondType.AROMATIC,
-               Chem.BondType.SINGLE,
-               Chem.BondType.DOUBLE,
-               Chem.BondType.TRIPLE]
-
+BOND_ORDERS = ms.bond_orders
 __all__ = ['mol_gen', 'to_tensor', 'get_mol_from_array']
 
 # for test only:
 # __all__ = ['mol_gen', 'to_tensor', 'collate_fn', 'get_array_from_mol']
 
 
-def sample_ordering(mol, num_samples, p=0.9, ms=mol_spec.get_default_mol_spec()):
-    """Sampling decoding routes of a given molecule `mol`
-    Parameters
-    ----------
-        mol : Chem.Mol
-            the given molecule (type: Chem.Mol)
-        num_samples: int
-            number of routes to sample (type: int)
-        p : float
-            1 - probability of making a mistake at each step (type: float)
-        ms : mol_spec.MoleculeSpec
+# def sample_ordering(mol, num_samples, p=0.9, ms=mol_spec.get_default_mol_spec()):
+#     """Sampling decoding routes of a given molecule `mol`
+#     Parameters
+#     ----------
+#         mol : Chem.Mol
+#             the given molecule (type: Chem.Mol)
+#         num_samples: int
+#             number of routes to sample (type: int)
+#         p : float
+#             1 - probability of making a mistake at each step (type: float)
+#         ms : mol_spec.MoleculeSpec
 
-    Returns
-    -------
-        - route_list[i][j] the index of the atom reached at step j in sample i
-        - step_ids_list[i][j]: the step at which atom j is reach at sample i
-        - logp_list[i]: the log-likelihood value of route i
-    """
+#     Returns
+#     -------
+#         - route_list[i][j] the index of the atom reached at step j in sample i
+#         - step_ids_list[i][j]: the step at which atom j is reach at sample i
+#         - logp_list[i]: the log-likelihood value of route i
+#     """
 
-    # build graph
-    atom_types, atom_ranks, bonds= [], [], []
-    for atom in mol.GetAtoms():
-        atom_types.append(ms.get_atom_type(atom))
-    for r in Chem.CanonicalRankAtoms(mol):
-        atom_ranks.append(r)
-    for b in mol.GetBonds():
-        idx_1, idx_2 = b.GetBeginAtomIdx(), b.GetEndAtomIdx()
-        bonds.append([idx_1, idx_2])
+#     # build graph
+#     atom_types, atom_ranks, bonds= [], [], []
+#     for atom in mol.GetAtoms():
+#         atom_types.append(ms.get_atom_type(atom))
+#     for r in Chem.CanonicalRankAtoms(mol):
+#         atom_ranks.append(r)
+#     for b in mol.GetBonds():
+#         idx_1, idx_2 = b.GetBeginAtomIdx(), b.GetEndAtomIdx()
+#         bonds.append([idx_1, idx_2])
 
-    # build nx graph
-    graph = nx.Graph()
-    graph.add_nodes_from(range(len(atom_ranks)))
-    graph.add_edges_from(bonds)
+#     # build nx graph
+#     graph = nx.Graph()
+#     graph.add_nodes_from(range(len(atom_ranks)))
+#     graph.add_edges_from(bonds)
 
-    route_list, step_ids_list, logp_list = [], [], []
-    for i in range(num_samples):
-        step_ids, log_p = traverse_graph(graph, atom_ranks, atom_types, p=p)
-        step_ids_list.append(step_ids)
-        step_ids = np.argsort(step_ids)
-        route_list.append(step_ids)
-        logp_list.append(log_p)
+#     route_list, step_ids_list, logp_list = [], [], []
+#     for i in range(num_samples):
+#         step_ids, log_p = traverse_graph(graph, atom_ranks, atom_types, p=p)
+#         step_ids_list.append(step_ids)
+#         step_ids = np.argsort(step_ids)
+#         route_list.append(step_ids)
+#         logp_list.append(log_p)
 
-    # cast to numpy array
-    route_list, step_ids_list = np.array(route_list, dtype=np.int32), np.array(step_ids_list, dtype=np.int32)
-    logp_list = np.array(logp_list, dtype=np.float32)
+#     # cast to numpy array
+#     route_list, step_ids_list = np.array(route_list, dtype=np.int32), np.array(step_ids_list, dtype=np.int32)
+#     logp_list = np.array(logp_list, dtype=np.float32)
 
-    return route_list, step_ids_list, logp_list
+#     return route_list, step_ids_list, logp_list
 
-def traverse_graph(graph, atom_ranks, atom_types, current_node=None, step_ids=None, p=0.9, log_p=0.0):
-    """ An recursive function for stochastic traversal of graph `graph`
-    Parameters
-    ----------
-        graph: nx.Graph
-            graph to traverse
-        atom_ranks : list
-            list storing the rank of each atom
-        atom_types: list
-            list storing the type of each atom
-        current_node : int
-            an integer indicating the current node, eq to None if the traversal is not yet started
-        step_ids : int
-            storing the step where each atom is traversed
-        p : float
-            1 - probability of making a mistake at each step (type: float)
-        log_p : float
-            the log-likelihood value
+# def traverse_graph(graph, atom_ranks, atom_types, current_node=None, step_ids=None, p=0.9, log_p=0.0):
+#     """ An recursive function for stochastic traversal of graph `graph`
+#     Parameters
+#     ----------
+#         graph: nx.Graph
+#             graph to traverse
+#         atom_ranks : list
+#             list storing the rank of each atom
+#         atom_types: list
+#             list storing the type of each atom
+#         current_node : int
+#             an integer indicating the current node, eq to None if the traversal is not yet started
+#         step_ids : int
+#             storing the step where each atom is traversed
+#         p : float
+#             1 - probability of making a mistake at each step (type: float)
+#         log_p : float
+#             the log-likelihood value
 
-    Returns
-    -------
-        tuple[list[int], float]
-            step_ids and log_p for the next traversal step
-    """
+#     Returns
+#     -------
+#         tuple[list[int], float]
+#             step_ids and log_p for the next traversal step
+#     """
 
-    if current_node is None:
-        next_nodes = range(len(atom_ranks)) # the first step: include all atoms
-        next_nodes = sorted(next_nodes, key=lambda _x:atom_ranks[_x]) # sort by atom rank
+#     if current_node is None:
+#         next_nodes = range(len(atom_ranks)) # the first step: include all atoms
+#         next_nodes = sorted(next_nodes, key=lambda _x:atom_ranks[_x]) # sort by atom rank
 
-        step_ids = [-1, ] * len(next_nodes)
-    else:
-        next_nodes = graph.neighbors(current_node)  # get neighbor nodes
-        next_nodes = sorted(next_nodes, key=lambda _x:atom_ranks[_x])  # sort by atom rank
+#         step_ids = [-1, ] * len(next_nodes)
+#     else:
+#         next_nodes = graph.neighbors(current_node)  # get neighbor nodes
+#         next_nodes = sorted(next_nodes, key=lambda _x:atom_ranks[_x])  # sort by atom rank
 
-        next_nodes = [n for n in next_nodes if step_ids[n] < 0] # filter visited nodes
+#         next_nodes = [n for n in next_nodes if step_ids[n] < 0] # filter visited nodes
 
-    # iterate through neighbors
-    while len(next_nodes) > 0:
-        if len(next_nodes)==1:
-            next_node = next_nodes[0]
-        elif random.random() >= (1 - p):
-            next_node = next_nodes[0]
-            log_p += np.log(p)
-        else:
-            next_node = next_nodes[random.randint(0, len(next_nodes) - 1)]
-            log_p += np.log((1.0 - p) / len(next_nodes))
-        step_ids[next_node] = max(step_ids) + 1
-        _, log_p = traverse_graph(graph, atom_ranks, atom_types, next_node, step_ids, p, log_p)
-        next_nodes = [n for n in next_nodes if step_ids[n] < 0] # filter visited nodes
+#     # iterate through neighbors
+#     while len(next_nodes) > 0:
+#         if len(next_nodes)==1:
+#             next_node = next_nodes[0]
+#         elif random.random() >= (1 - p):
+#             next_node = next_nodes[0]
+#             log_p += np.log(p)
+#         else:
+#             next_node = next_nodes[random.randint(0, len(next_nodes) - 1)]
+#             log_p += np.log((1.0 - p) / len(next_nodes))
+#         step_ids[next_node] = max(step_ids) + 1
+#         _, log_p = traverse_graph(graph, atom_ranks, atom_types, next_node, step_ids, p, log_p)
+#         next_nodes = [n for n in next_nodes if step_ids[n] < 0] # filter visited nodes
 
-    return step_ids, log_p
+#     return step_ids, log_p
 
-def reorder(atom_types, bond_info, route, step_ids):
-    """ Reorder atom and bonds according the decoding route
-    Parameters
-    ----------
-        atom_types : np.ndarray
-            storing the atom type of each atom, size: num_atoms
-        bond_info : np.ndarray
-            storing the bond information, size: num_bonds x 3
-        route : np.ndarray
-            route index
-        step_ids : np.ndarray
-            step index
+# def reorder(atom_types, bond_info, route, step_ids):
+#     """ Reorder atom and bonds according the decoding route
+#     Parameters
+#     ----------
+#         atom_types : np.ndarray
+#             storing the atom type of each atom, size: num_atoms
+#         bond_info : np.ndarray
+#             storing the bond information, size: num_bonds x 3
+#         route : np.ndarray
+#             route index
+#         step_ids : np.ndarray
+#             step index
 
-    Returns
-    -------
-        tuple[np.ndarray, np.ndarray, np.ndarray]
-            reordered atom_types and bond_info
-    """
+#     Returns
+#     -------
+#         tuple[np.ndarray, np.ndarray, np.ndarray]
+#             reordered atom_types and bond_info
+#     """
 
-    atom_types, bond_info = np.copy(atom_types), np.copy(bond_info)
+#     atom_types, bond_info = np.copy(atom_types), np.copy(bond_info)
 
-    # sort by step_ids
-    atom_types = atom_types[route]
-    bond_info[:, 0], bond_info[:, 1] = step_ids[bond_info[:, 0]], step_ids[bond_info[:, 1]]
-    max_b, min_b = np.amax(bond_info[:, :2], axis=1), np.amin(bond_info[:, :2], axis=1)
-    bond_info = bond_info[np.lexsort([-min_b, max_b]), :]
+#     # sort by step_ids
+#     atom_types = atom_types[route]
+#     bond_info[:, 0], bond_info[:, 1] = step_ids[bond_info[:, 0]], step_ids[bond_info[:, 1]]
+#     max_b, min_b = np.amax(bond_info[:, :2], axis=1), np.amin(bond_info[:, :2], axis=1)
+#     bond_info = bond_info[np.lexsort([-min_b, max_b]), :]
 
-    # separate append and connect
-    max_b, min_b = np.amax(bond_info[:, :2], axis=1), np.amin(bond_info[:, :2], axis=1)
-    is_append = np.concatenate([np.array([True]), max_b[1:] > max_b[:-1]])
-    bond_info = np.concatenate([np.where(is_append[:, np.newaxis],
-                                         np.stack([min_b, max_b], axis=1),
-                                         np.stack([max_b, min_b], axis=1)),
-                                bond_info[:, -1:]], axis=1)
+#     # separate append and connect
+#     max_b, min_b = np.amax(bond_info[:, :2], axis=1), np.amin(bond_info[:, :2], axis=1)
+#     is_append = np.concatenate([np.array([True]), max_b[1:] > max_b[:-1]])
+#     bond_info = np.concatenate([np.where(is_append[:, np.newaxis],
+#                                          np.stack([min_b, max_b], axis=1),
+#                                          np.stack([max_b, min_b], axis=1)),
+#                                 bond_info[:, -1:]], axis=1)
 
-    return atom_types, bond_info, is_append
+#     return atom_types, bond_info, is_append
 
 def get_array_from_mol(mol, num_samples=1, p=0.9, ms=mol_spec.get_default_mol_spec()):
 

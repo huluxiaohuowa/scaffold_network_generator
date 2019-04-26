@@ -1,8 +1,8 @@
 from rdkit import Chem
 
 from data.utils import get_num_lines, ls_inter
-from . import graph
-from .proto import *
+from data import graph
+from data.proto import *
 import linecache
 from multiprocessing import Pool
 from os import path
@@ -67,7 +67,7 @@ def get_sng_from_smiles(smiles):
 
 
 def smiles_from_line(idx=0, file=input_dir):
-    return linecache.getline(file, idx+1).strip()
+    return linecache.getline(file, idx + 1).strip()
 
 
 def sng_from_line(idx=0, file=input_dir):
@@ -209,7 +209,7 @@ def data_from_queue(q, print_step=5000):
         except:
             continue
     dic_idx_sm = DicIdxSm()
-    for k,v in dic_sm_idx.sm_sc.items():
+    for k, v in dic_sm_idx.sm_sc.items():
         dic_idx_sm.sm_sc[v] = k
 
     return dic_scaffold, dic_idx_sm
@@ -283,15 +283,5 @@ def data_from_queue(q, print_step=5000):
 #             # 将该scaffold对应的 当前正在处理的mol_id和atom_list添加到dataset当中
 #             dataset.idx_scaffold[sng_dict_index].dic_mol_atoms.extend([sng_pb])
 #     return scaffold_dict, dataset
-
-
-
-
-
-
-
-
-
-
 
 

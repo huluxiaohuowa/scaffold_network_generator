@@ -4,7 +4,7 @@ from rdkit import Chem
 import networkx as nx
 from rdkit.Chem import rdmolops
 from copy import deepcopy
-from . import utils
+from data import utils
 
 __all__ = ['get_mol_graph', ]
 

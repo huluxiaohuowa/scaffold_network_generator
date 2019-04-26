@@ -4,12 +4,24 @@ from os import path
 
 __all__ = ['MoleculeSpec', 'get_default_mol_spec']
 
+
 class MoleculeSpec(object):
 
-    def __init__(self, file_name=path.join(path.dirname(__file__),
-                                                        'datasets',
-                                                        'atom_types.txt'),
-                 max_num_atoms=50, max_num_bonds=100):
+    def __init__(
+        self,
+        file_name=path.join(
+            path.dirname(__file__),
+            'datasets',
+            'atom_types.txt'
+        ),
+        input_file=path.join(
+            path.dirname(__file__),
+            'datasets',
+            'input.smi'
+        ),
+        max_num_atoms=50, 
+        max_num_bonds=100
+    ):
         """The helper class to store information about atom types and bond types
         Parameters
         ----------
@@ -23,6 +35,31 @@ class MoleculeSpec(object):
         """
         self.atom_types = []
         self.atom_symbols = []
+        if not path.exists(file_name):
+            ls_atom_feat = []            
+            with open(input_file) as fr:
+                for line in fr.readlines():
+                    line = line.strip()
+                    try:
+                        mol = Chem.MolFromSmiles(line)
+                        for atom in mol.GetAtoms():
+                                atom_feat = [
+                                    atom.GetSymbol(),
+                                    atom.GetFormalCharge(),
+                                    atom.GetNumExplicitHs()
+                                ]
+                                if atom_feat not in ls_atom_feat:
+                                    ls_atom_feat.append(atom_feat)
+                    except:
+                        continue
+            with open(file_name, 'w') as f:
+                for atom_feat in ls_atom_feat:
+                    f.write(
+                        str(atom_feat[0]) + ',' +
+                        str(atom_feat[1]) + ',' +
+                        str(atom_feat[2]) + '\n'
+                    )
+
         with open(file_name) as f:
             for line in f:
                 atom_type_i = line.strip('\n').split(',')

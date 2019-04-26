@@ -7,7 +7,7 @@ from collections import Iterable
 import random
 import itertools
 import math
-from . import data_struct as mol_spec
+from data import data_struct as mol_spec
 import numpy as np
 from rdkit import Chem
 import networkx as nx
@@ -29,11 +29,11 @@ __all__ = [
 ]
 
 
-
 class Block(object):
     def __init__(self, block_id):
         super().__init__()
         self.num = block_id
+
     def __repr__(self):
         return self.num.__repr__()
 

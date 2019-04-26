@@ -8,13 +8,13 @@
 
 ## Contributers
 [![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/0)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/0)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/1)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/1)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/2)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/2)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/3)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/3)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/4)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/4)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/5)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/5)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/6)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/6)[![](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/images/7)](https://sourcerer.io/fame/jach4/jach4/scaffold_network_generator/links/7)
->>>>>>> gh/master
+>>>>>>> 
 ## Usage
 
 ```bash
 git clone git@github.com:jach4/scaffold_network_generator.git sng
 cd sng
-python scaffolds_output.py --np=50 --file_input=data/datasets/input.smi --scaffolds_output=data/datasets/scaffolds.smi --file_output=data/datasets/scaffolds.bin 
+python scaffolds_output.py --np=50 --file_input=data/datasets/input.smi --scaffolds_output=data/datasets/idx_sm.bin --file_output=data/datasets/idx_ls.bin 
 ```
 ## Read the entire scaffold message from a file
 
@@ -25,10 +25,13 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 from rdkit.Chem.Draw import IPythonConsole
 
-dic = DicSmScaffoldLs()
-with open('data/datasets/scaffolds.bin','rb') as f:
-    dic.ParseFromString(f.read())
-    
+dic_scaffold = DicIdxLs()
+with open('data/datasets/idx_ls.bin', 'rb') as f:
+    dic_scaffold.ParseFromString(f.read())
+dic_idx_sm = DicIdxSm()
+with open('data/datasets/idx_sm.bin', 'rb') as f:
+    dic_idx_sm.ParseFromString(f.read())
+
 print(len(dic.smiles_scaffold))
 ```
 
@@ -39,17 +42,17 @@ print(len(dic.smiles_scaffold))
 
 
 ```python
-print(scaffold_smiles_idx(1990))
-Chem.MolFromSmiles(scaffold_smiles_idx(1990))
+print(dic_idx_sm.sm_sc[1990])
+Chem.MolFromSmiles(dic_idx_sm.sm_sc[1990])
 ```
 
     c1n[nH]nc1-c1nnc(-c2cnns2)o1
 
-{% assert_imag Scaffold-network-generator/output_3_1.png %}
+![avatar](images/output_3_1.png)
 
 
 ```python
-dic.smiles_scaffold[scaffold_smiles_idx(1990)]
+dic_scaffold.smiles_scaffold[1990]
 ```
 
 
@@ -83,14 +86,14 @@ dic.smiles_scaffold[scaffold_smiles_idx(1990)]
 
 
 
-### The 111,921th molecule containing the 6th scaffold
+### The 111,921th molecule containing the 1990th scaffold
 
 
 ```python
 Chem.MolFromSmiles(smiles_from_line(111921))
 ```
 
-{% assert_imag Scaffold-network-generator/output_6_0.png %}
+![avatar](images/output_6_0.png)
 
 ### Get the scaffold network of The 111,921th molecule
 
@@ -104,7 +107,7 @@ scaffold_list = get_mol_graph(smiles_from_line(111921)).ls_mol_from_sng_u()
 Draw.MolsToGridImage(scaffold_list)
 ```
 
-{% assert_imag Scaffold-network-generator/output_9_0.png %}
+![avatar](images/output_9_0.png)
 
 
 

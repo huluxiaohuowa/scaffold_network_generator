@@ -15,7 +15,7 @@
 ```bash
 git clone git@github.com:jach4/scaffold_network_generator.git sng
 cd sng
-python scaffolds_output.py --np=50 --file_input=data/datasets/input.smi --scaffolds_output=data/datasets/idx_sm.bin --file_output=data/datasets/idx_ls.bin 
+python scaffolds_output.py --np=50 --nq=100000 --file_input=data/datasets/input.smi --scaffolds_output=data/datasets/idx_sm.bin --file_output=data/datasets/idx_ls.bin 
 ```
 ## Read the entire scaffold message from a file
 

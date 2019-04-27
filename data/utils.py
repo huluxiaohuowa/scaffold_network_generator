@@ -10,6 +10,7 @@ from copy import deepcopy
 from data import data_struct
 from os import path
 from data import data_struct as mol_spec
+import linecache
 
 ms = mol_spec.get_default_mol_spec()
 ATOM_SYMBOLS = ms.atom_symbols
@@ -24,7 +25,12 @@ ATOM_SYMBOLS = ms.atom_symbols
 #         ATOM_SYMBOLS.append(line[0])
 
 BOND_ORDERS = ms.bond_orders
-__all__ = ['mol_gen', 'to_tensor', 'get_mol_from_array']
+__all__ = [
+    'mol_gen', 
+    'to_tensor', 
+    'get_mol_from_array',
+    'str_from_line',
+]
 
 # for test only:
 # __all__ = ['mol_gen', 'to_tensor', 'collate_fn', 'get_array_from_mol']
@@ -167,6 +173,19 @@ __all__ = ['mol_gen', 'to_tensor', 'get_mol_from_array']
 
 #     return atom_types, bond_info, is_append
 
+def str_from_line(file, idx):
+    """
+    Get string from a specific line
+    Args:
+        idx (int): index of line
+        file (string): location of a file
+
+    Returns:
+
+    """
+    return linecache.getline(file, idx + 1).strip()
+
+
 def get_array_from_mol(mol, num_samples=1, p=0.9, ms=mol_spec.get_default_mol_spec()):
 
     atom_types, bond_info = [], []
@@ -217,6 +236,7 @@ def get_array_from_mol(mol, num_samples=1, p=0.9, ms=mol_spec.get_default_mol_sp
     # logp: num_samples
 
     return mol_array, logp
+
 
 def get_mol_from_array(mol_array, sanitize=True, ms=mol_spec.get_default_mol_spec()):
     """
@@ -274,7 +294,7 @@ def get_mol_from_array(mol_array, sanitize=True, ms=mol_spec.get_default_mol_spe
     return mol_list
 
 
-def collate_fn(batch, k, p, ms=mol_spec.get_default_mol_spec()): # batch = input [mol, mol, mol ...]
+def collate_fn(batch, k, p, ms=mol_spec.get_default_mol_spec()):  # batch = input [mol, mol, mol ...]
     # get the maximum number of atoms and bonds in this batch
     num_bonds_list = [mol.GetNumBonds() for mol in batch]
     max_num_steps = max(num_bonds_list) + 1
@@ -304,6 +324,7 @@ def collate_fn(batch, k, p, ms=mol_spec.get_default_mol_spec()): # batch = input
     # logp: batch_size x k
 
     return mol_array, logp
+
 
 def mol_gen(directory='datasets', file_names=('ChEMBL_0.smi',),
             batch_size=128, num_epochs=5,
@@ -375,6 +396,7 @@ def mol_gen(directory='datasets', file_names=('ChEMBL_0.smi',),
             end_counter += 1
         else:
             yield record
+
 
 def to_tensor(record, device=torch.device('cpu')):
     """Convert numpy record to pytorch tensors
@@ -556,7 +578,6 @@ def get_mol_from_graph(symbol_charge_hs,
     for bond in bond_start_end:
         chem.index_to_bond(mol, bond[0], bond[1], bond[2])
 
-
     if sanitize:
         try:
             mol = mol.GetMol()
@@ -568,8 +589,6 @@ def get_mol_from_graph(symbol_charge_hs,
         return None
 
 
-
-
 def get_mol_from_graph_list(ls_ls_atom,
                             ls_ls_bond,
                             sanitize=True
@@ -578,12 +597,12 @@ def get_mol_from_graph_list(ls_ls_atom,
     return mol_list
 
 
-
 def id_mol(mol):
     atoms = mol.GetNumAtoms()
     for idx in range(atoms):
         mol.GetAtomWithIdx(idx).SetProp('molAtomMapNumber', str(mol.GetAtomWithIdx(idx).GetIdx()))
     return mol
+
 
 def ls_inter(ls1, ls2):
     """

@@ -79,7 +79,10 @@ def sng_from_line_2_queue(idx, q, file=input_dir):
         sng = sng_from_line(idx, file=file)
         if sng is not None:
             q.put((idx, sng))
+        else:
+            q.put((idx, None))
     except:
+        q.put((idx, None))
         print(smiles_from_line(idx=idx))
 
 
@@ -156,7 +159,12 @@ def scaffold_mol_idx(idx, file=path.join(path.dirname(__file__),
 #     return scaffold_dict, dataset
 
 
-def data_from_queue(q, print_step=5000):
+def data_from_queue(
+    q,
+    map_file,
+    idx_file,
+    print_step=5000,
+):
     """
 
     Parameters
@@ -177,42 +185,39 @@ def data_from_queue(q, print_step=5000):
     i = 0
     num_lines = get_num_lines(file)
     idx_sc = 0
-    while True:
-        i += 1
+    while True:        
         if i % print_step == 0:
             print(i)
-        if i > num_lines:
+        if i >= num_lines:
             break
         try:
-            mol_index, sng = q.get_nowait()
+            mol_index, sng = q.get()
+            i += 1
+            if sng is not None:
+                for sng_i in sng:
+                    sng_pb = TupMolLsatom()
+                    sng_pb.idx_mol = mol_index
+                    sng_pb.ls_atom.idx_atom.extend(sng_i[1])
+                    sng_pb.ls_nh.idx_atom.extend(sng_i[2])
+                    sng_pb.ls_np.idx_atom.extend(sng_i[3])
 
-            for sng_i in sng:
-                sng_pb = TupMolLsatom()
-                sng_pb.idx_mol = mol_index
-                sng_pb.ls_atom.idx_atom.extend(sng_i[1])
-                sng_pb.ls_nh.idx_atom.extend(sng_i[2])
-                sng_pb.ls_np.idx_atom.extend(sng_i[3])
-
-                if sng_i[0] not in dic_sm_idx.sm_sc.keys():
-                    dic_sm_idx.sm_sc[sng_i[0]] = idx_sc
-                    idx_sc += 1
-            # for sm_sng, idx_atoms in sng[0]:
-            #     sng_pb = TupMolLsatom()
-            #     sng_pb.idx_mol = mol_index
-            #     sng_pb.ls_atom.idx_atom.extend(idx_atoms)
-            #     sng_pb.ls_nh.idx_atom.extend(ls_inter(sng[1], idx_atoms))
-            #     sng_pb.ls_np.idx_atom.extend(ls_inter(sng[2], idx_atoms))
-            #     if sm_sng not in dic_sm_idx.sm_sc.keys():
-            #         dic_sm_idx.sm_sc[sm_sng] = idx_sc
-            #         idx_sc += 1
-                dic_scaffold.smiles_scaffold[dic_sm_idx.sm_sc[sng_i[0]]].dic_mol_atoms.extend([sng_pb])
+                    if sng_i[0] not in dic_sm_idx.sm_sc.keys():
+                        dic_sm_idx.sm_sc[sng_i[0]] = idx_sc
+                        idx_sc += 1
+                    dic_scaffold.smiles_scaffold[dic_sm_idx.sm_sc[sng_i[0]]].dic_mol_atoms.extend([sng_pb])
+            else:
+                continue
         except:
             continue
     dic_idx_sm = DicIdxSm()
     for k, v in dic_sm_idx.sm_sc.items():
         dic_idx_sm.sm_sc[v] = k
 
-    return dic_scaffold, dic_idx_sm
+    # return dic_scaffold, dic_idx_sm
+    with open(map_file, 'wb') as f:
+        f.write(dic_scaffold.SerializeToString())
+    with open(idx_file, 'wb') as f:
+        f.write(dic_idx_sm.SerializeToString())
     #
     # for i in range(get_num_lines(file)):
     #     if i % print_step == 0:

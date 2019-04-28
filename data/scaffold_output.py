@@ -6,6 +6,9 @@ from data.proto import *
 import linecache
 from multiprocessing import Pool
 from os import path
+from time import sleep
+import json
+import psycopg2
 
 # input_file = 'input_10.txt'
 input_file = 'input.smi'
@@ -75,15 +78,23 @@ def sng_from_line(idx=0, file=input_dir):
 
 
 def sng_from_line_2_queue(idx, q, file=input_dir):
-    try:
-        sng = sng_from_line(idx, file=file)
-        if sng is not None:
-            q.put((idx, sng))
+    while True:
+        if q.full():
+            print('full')
+            sleep(0.3)
+            continue
         else:
-            q.put((idx, None))
-    except:
-        q.put((idx, None))
-        print(smiles_from_line(idx=idx))
+            try:
+                sng = sng_from_line(idx, file=file)
+                if sng is not None:
+                    q.put((idx, sng))
+                else:
+                    q.put((idx, None))
+                break
+            except:
+                q.put((idx, None))
+                print(smiles_from_line(idx=idx, file=file))
+                break
 
 
 def sng_to_queue(q, processes=30, file=input_dir):
@@ -159,6 +170,114 @@ def scaffold_mol_idx(idx, file=path.join(path.dirname(__file__),
 #     return scaffold_dict, dataset
 
 
+def sql_from_queue(
+    q,
+    dic_path,
+    db_name,
+    print_step=5000
+):
+    dic = json.load(open(dic_path))
+    i = 0
+    map_id = 0
+    sc_key = 0
+    file = q.get()
+    num_lines = get_num_lines(file)
+
+    # create a table
+    conn = psycopg2.connect(**dic)
+    cur = conn.cursor()
+    cur.execute(
+        f'''
+        drop table if exists maps;
+        drop table if exists scaffolds;
+        drop table if exists mols;
+
+        CREATE TABLE scaffolds (id integer PRIMARY KEY, smiles varchar);
+        
+        CREATE TABLE mols (id integer PRIMARY KEY, smiles varchar);
+        
+        CREATE TABLE maps (
+            id integer PRIMARY KEY, 
+            sc_id integer references scaffolds(id), 
+            mol_id integer references mols(id),
+            ls_atom_idx varchar,
+            ls_nh varchar,
+            ls_np varchar
+        );
+        '''
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    while True:
+        if i % print_step == 0:
+            print(i)
+        if i >= num_lines:
+            break
+        mol_index, sng = q.get()
+        i += 1
+        mol_smiles = smiles_from_line(mol_index, file).strip()
+
+        conn = psycopg2.connect(**dic)
+        cur = conn.cursor()
+        cur.execute(
+            f'''
+            insert into mols(id, smiles) values({mol_index}, '{mol_smiles}');
+
+            '''
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        if sng is not None:
+            for i_sng in sng:
+                conn = psycopg2.connect(**dic)
+                cur = conn.cursor()
+                cur.execute(
+                    f'''
+                    select count(*) from scaffolds where smiles='{i_sng[0]}';
+                    '''
+                )
+                num_ex = cur.fetchone()[0]
+                if not num_ex:
+                    sc_id = sc_key
+                    cur.execute(
+                        f'''
+                        insert into scaffolds(id, smiles)
+                            values ({sc_id}, '{i_sng[0]}');
+                        '''
+                    )
+                    conn.commit()
+                    sc_key += 1
+                else:
+                    cur.execute(
+                        f'''
+                        select id from scaffolds where smiles='{i_sng[0]}';
+
+                        '''
+                    )
+                    sc_id = cur.fetchone()[0]
+                cur.execute(
+                    f'''
+                    insert into maps(id, sc_id, mol_id, ls_atom_idx, ls_nh, ls_np)
+                        values(
+                            {map_id},
+                            {sc_id},
+                            {mol_index},
+                            '{str(i_sng[1])}',
+                            '{str(i_sng[2])}',
+                            '{str(i_sng[3])}'
+                        );
+                    '''
+                )
+                conn.commit()
+                map_id += 1
+                cur.close()
+                conn.close()
+
+
 def data_from_queue(
     q,
     map_file,
@@ -190,9 +309,9 @@ def data_from_queue(
             print(i)
         if i >= num_lines:
             break
+        mol_index, sng = q.get()
+        i += 1
         try:
-            mol_index, sng = q.get()
-            i += 1
             if sng is not None:
                 for sng_i in sng:
                     sng_pb = TupMolLsatom()

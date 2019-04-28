@@ -49,26 +49,62 @@ parser.add_argument(
     type=int,
     default=5000
 )
+parser.add_argument(
+    "--out_fmt",
+    help="Format of output file",
+    type=str,
+    default="protobuf"
+)
+parser.add_argument(
+    "--sql_dic",
+    help="A json file with postgres connection kargs",
+    type=str,
+    default='data1.json'
+)
+parser.add_argument(
+    "--db_name",
+    help="Database name",
+    type=str,
+    default='sc1'
+)
 
 args = parser.parse_args()
 q = Manager().Queue(args.nq)
 q.put(args.file_input)
 p = Pool(processes=args.np)
 
-p_get = Process(
-    target=data_from_queue,
-    args=(
-        q,
-        args.file_output,
-        args.scaffolds_output,
-        args.print_step
+if args.out_fmt == "protobuf":
+    p_get = Process(
+        target=data_from_queue,
+        args=(
+            q,
+            args.file_output,
+            args.scaffolds_output,
+            args.print_step
+        )
     )
-)
+elif args.out_fmt == "postgres":
+    p_get = Process(
+        target=sql_from_queue,
+        args=(
+            q,
+            args.sql_dic,
+            args.db_name,
+            args.print_step
+        )
+    )
+else:
+    raise ValueError("out_fmt must be \"protobuf\" or \"postgres\"")
 
 
 for i in range(get_num_lines(args.file_input)):
-    p.apply_async(sng_from_line_2_queue,
-        (i, q)
+    p.apply_async(
+        sng_from_line_2_queue,
+        (
+            i,
+            q,
+            args.file_input
+        )
     )
 
 

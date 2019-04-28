@@ -16,7 +16,7 @@
 git clone git@github.com:jach4/scaffold_network_generator.git sng
 cd sng
 
-python scaffolds_output.py --out_fmt=ptotobuf --np=50 --nq=100000 --file_input=data/datasets/input.smi --scaffolds_output=data/datasets/idx_sm.bin --file_output=data/datasets/idx_ls.bin 
+python scaffolds_output.py --out_fmt=protobuf --np=50 --nq=100000 --file_input=data/datasets/input.smi --scaffolds_output=data/datasets/idx_sm.bin --file_output=data/datasets/idx_ls.bin 
 
 python scaffolds_output.py --out_fmt=postgres --np=80 --nq=100000 --file_input=data/datasets/input.smi --sql_dic=./data1.json --db_name=sc1
 ```
@@ -36,7 +36,7 @@ dic_idx_sm = DicIdxSm()
 with open('data/datasets/idx_sm.bin', 'rb') as f:
     dic_idx_sm.ParseFromString(f.read())
 
-print(len(dic.smiles_scaffold))
+print(len(dic_scaffold.smiles_scaffold))
 ```
 
     402344

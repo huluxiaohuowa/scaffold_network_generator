@@ -10,7 +10,6 @@ from time import sleep
 import json
 import psycopg2
 
-# input_file = 'input_10.txt'
 input_file = 'input.smi'
 input_dir = path.join(path.dirname(__file__),
                       'datasets',
@@ -22,20 +21,16 @@ def get_sng_from_smiles(smiles):
     """
 
     Parameters
-    ----------
         smiles: str
             A molecule SMILES
 
     Returns
         ls_mol_atom_idx: list
             list of tuples
-    -------
 
     """
     mol_graph = graph.get_mol_graph(smiles)
     if any(mol_graph.sssr):
-        # ls_nh = mol_graph.hydro_nitro
-        # ls_np = mol_graph.ar_n_plus
         if mol_graph.graph_list_to_list() is not None:
             ls_atom, ls_bond = mol_graph.graph_list_to_list()
         else:

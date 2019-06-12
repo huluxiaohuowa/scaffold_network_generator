@@ -1,5 +1,5 @@
 from multiprocessing import Manager, cpu_count, Pool, Process
-from data import *
+from data_utils import *
 import argparse
 from os import path
 

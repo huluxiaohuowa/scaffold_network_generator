@@ -1,16 +1,19 @@
-from rdkit import Chem
 import re
-import torch
-import numpy as np
 import random
-import networkx as nx
 import multiprocessing as mp
 import os
 from copy import deepcopy
-from data import data_struct
 from os import path
-from data import data_struct as mol_spec
 import linecache
+
+import numpy as np
+import torch
+from rdkit import Chem
+from rdkit.Chem import AllChem
+import networkx as nx
+
+from data import data_struct as mol_spec
+from data import data_struct
 
 ms = mol_spec.get_default_mol_spec()
 ATOM_SYMBOLS = ms.atom_symbols
@@ -30,6 +33,7 @@ __all__ = [
     'to_tensor', 
     'get_mol_from_array',
     'str_from_line',
+    'get_ranked_smiles',
 ]
 
 # for test only:
@@ -423,6 +427,7 @@ def to_tensor(record, device=torch.device('cpu')):
 
     return mol_array, logp
 
+
 def get_num_lines(input_file):
     for num_lines, line in enumerate(open(input_file, 'r')):
         pass
@@ -566,10 +571,11 @@ def graph_eq(graph1, graph2):
         return False
 
 
-def get_mol_from_graph(symbol_charge_hs,
-                       bond_start_end,
-                       sanitize=True
-                       ):
+def get_mol_from_graph(
+    symbol_charge_hs,
+    bond_start_end,
+    sanitize=True
+):
 
     chem = data_struct.get_default_mol_spec()
     mol = Chem.RWMol(Chem.Mol())
@@ -615,3 +621,56 @@ def ls_inter(ls1, ls2):
         ls (list):
     """
     return list(set(ls1).intersection(set(ls2)))
+
+
+# def get_ranked_smiles(smiles):
+#     rd_mol = AllChem.MolFromSmiles(smiles)
+#     ranked_1 = list(AllChem.CanonicalRankAtoms(rd_mol, breakTies=True))
+#     for i, j in enumerate(ranked_1):
+#         rd_mol.GetAtomWithIdx(i).SetIntProp('molAtomMapNumber', j + 1)
+#     return AllChem.MolToSmiles(rd_mol, canonical=True)
+
+def graph_to_c_scaffold(graph):
+    chem = data_struct.get_default_mol_spec()
+    mol = Chem.RWMol(Chem.Mol())
+    for i in range(len(graph.nodes)):
+        a = chem.index_to_atom(0)
+        a.SetProp( 
+            'molAtomMapNumber', 
+            str(i) 
+        )
+        mol.AddAtom(a)
+    for begin_id, end_id in graph.edges:
+        mol.AddBond(
+            begin_id, 
+            end_id, 
+            Chem.rdchem.BondType.SINGLE
+        )
+    return AllChem.MolToSmiles(mol)
+
+
+def mol_to_graph(mol):
+    atom_types, bonds, bond_types = [], [], []
+    for atom in mol.GetAtoms():
+        atom_types.append(get_atom_type(atom))
+    for bond in mol.GetBonds():
+        idx_1, idx_2, bond_type = (
+            bond.GetBeginAtomIdx(), 
+            bond.GetEndAtomIdx(), 
+            get_bond_type(bond)
+        )
+        bonds.append([idx_1, idx_2])
+        bond_types.append(bond_type)
+    # build graph
+    graph = nx.Graph()
+    graph.add_nodes_from(range(mol.GetNumAtoms()))
+    graph.add_edges_from(bonds)
+    return graph
+
+
+def con_smi_to_c_smi(smiles):
+    return graph_to_c_scaffold(
+        mol_to_graph(
+            Chem.MolFromSmiles(smiles)
+        )
+    )

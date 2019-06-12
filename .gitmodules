@@ -1,3 +1,0 @@
-[submodule "data"]
-	path = data
-	url = ssh://git@ddl.bjmu.edu.cn:15806/deep-scaffold/data.git
